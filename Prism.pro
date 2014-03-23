@@ -11,22 +11,24 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Prism
 TEMPLATE = app
 
+INCLUDEPATH += include
 
-SOURCES += main.cpp\
-        MainWindow.cpp \
-    TrackItem.cpp \
-    TimelineItem.cpp \
-    ClipItem.cpp \
-    TrackModel.cpp \
-    ClipParamDialog.cpp
 
-HEADERS  += MainWindow.h \
-    TrackItem.h \
-    TimelineItem.h \
-    TrackModel.h \
-    ClipModel.h \
-    ClipItem.h \
-    ClipParamDialog.h
+SOURCES += src/main.cpp\
+    src/ClipItem.cpp \
+    src/MainWindow.cpp \
+    src/TrackItem.cpp \
+    src/ClipParamDialog.cpp \
+    src/TimelineItem.cpp \
+    src/TrackModel.cpp
 
-FORMS    += MainWindow.ui \
-    ClipParamDialog.ui
+HEADERS  += include/ClipItem.h \
+    include/TrackItem.h \
+    include/ClipParamDialog.h \
+    include/MainWindow.h \
+    include/ClipModel.h \
+    include/TimelineItem.h \
+    include/TrackModel.h
+
+FORMS    += forms/MainWindow.ui \
+    forms/ClipParamDialog.ui
