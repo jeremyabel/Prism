@@ -18,10 +18,13 @@ public:
     ClipItem( ClipModel* clipModel, QGraphicsItem *parent = 0 );
 
     QRectF          boundingRect() const;
-    void            mousePressEvent( QGraphicsSceneMouseEvent *event );
-    void            mouseMoveEvent( QGraphicsSceneMouseEvent *event );
-    void            mouseReleaseEvent( QGraphicsSceneMouseEvent *event );
-    void            mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event );
+
+    void            mousePressEvent(        QGraphicsSceneMouseEvent *event );
+    void            mouseMoveEvent(         QGraphicsSceneMouseEvent *event );
+    void            mouseReleaseEvent(      QGraphicsSceneMouseEvent *event );
+    void            mouseDoubleClickEvent(  QGraphicsSceneMouseEvent *event );
+    QVariant        itemChange(             GraphicsItemChange change, const QVariant &value );
+
     void            setZoomParams( float fSpacing, int iDivisions );
     float           calculateXPos();
 
@@ -29,8 +32,12 @@ public:
 
     bool            bDetached;
     bool            bMoved;
+    bool            bLocked;
+    bool            bMultiSelected;
     QColor          color;
     ClipModel*      pClipModel;
+    ClipItem*       pMasterClipItem;
+    int             masterInitStarting16ths;
 
 signals:
     void            mouseDown(   ClipItem* clip );
@@ -42,7 +49,7 @@ protected:
     void            paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
 private:
-    void            snapTo16ths();
+    void            snapTo16ths( int posx );
 
     float           m_fSpacing;
     float           m_fSpacing16ths;

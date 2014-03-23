@@ -8,10 +8,13 @@ const int TRACK_HEIGHT = 15;
 
 ClipItem::ClipItem( ClipModel* clipModel, QGraphicsItem *parent ) : QGraphicsObject( parent )
 {
-    m_fWidth    = 0;
-    bDetached   = false;
-    bMoved      = false;
-    pClipModel  = clipModel;
+    m_fWidth                = 0;
+    bDetached               = false;
+    bMoved                  = false;
+    bLocked                 = false;
+    bMultiSelected          = false;
+    pClipModel              = clipModel;
+    masterInitStarting16ths = -1;
 
     setFlag( QGraphicsItem::ItemIsSelectable );
     setFlag( QGraphicsItem::ItemIsMovable );
@@ -31,7 +34,7 @@ void ClipItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     // Draw clip rect
     painter->setPen( QPen( Qt::NoPen ) );
-    painter->setBrush( QBrush( color ) );
+    painter->setBrush( QBrush( color.darker(isSelected() ? 100 : 140) ) );
     painter->drawRect( QRect( 0, 0, m_fWidth - 1, TRACK_HEIGHT ) );
 
     // Draw right dividing line
@@ -65,9 +68,9 @@ float ClipItem::calculateXPos()
 }
 
 
-void ClipItem::snapTo16ths()
+void ClipItem::snapTo16ths( int posx )
 {
-    float fDeltaX           = m_clickCursorPos.x() - QCursor::pos().x();
+    float fDeltaX           = m_clickCursorPos.x() - posx;
     int   iDeltaDivisions   = -(int)roundf( fDeltaX / m_fSpacing16ths );
 
     pClipModel->setStarting16th( clamp( m_clickStarting16ths + iDeltaDivisions, 0, INFINITY ) );
@@ -96,7 +99,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     // If it looks like the user is trying to drag the clip to another track, detach it.
     // Otherwise, keep it here and snap to 16ths.
     if ( ( abs( m_prevCursorPos.y()  - QCursor::pos().y() ) > 5 ||
-           abs( m_clickCursorPos.y() - QCursor::pos().y() ) > 7 ) && !bDetached )
+           abs( m_clickCursorPos.y() - QCursor::pos().y() ) > 7 ) && !bDetached && !bLocked )
     {
         bDetached = true;
         this->setOpacity( 0.5f );
@@ -104,7 +107,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
     }
     else if ( !bDetached )
     {
-        snapTo16ths();
+        snapTo16ths( QCursor::pos().x() );
         setX( calculateXPos() );
         setY( 0 );
     }
@@ -119,15 +122,17 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 void ClipItem::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mouseReleaseEvent( event );
-
     bDetached = false;
+
     this->setOpacity( 1.0f );
 
     // Snap to position
-    snapTo16ths();
+    snapTo16ths( QCursor::pos().x() );
     setPos( calculateXPos(), 0 );
 
+    // Notify and reset
     emit mouseUp( this );
+    bLocked = false;
 }
 
 
@@ -137,3 +142,30 @@ void ClipItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
     emit mouseDouble( this );
 }
 
+
+QVariant ClipItem::itemChange( GraphicsItemChange change, const QVariant &value )
+{
+    if ( change == ItemPositionChange && scene() && bMultiSelected && pMasterClipItem )
+    {
+        // Original offset
+        if ( masterInitStarting16ths == -1 )
+            masterInitStarting16ths = pMasterClipItem->pClipModel->starting16th;
+
+        // New offset
+        int inc = pClipModel->starting16th + (pMasterClipItem->pClipModel->starting16th - masterInitStarting16ths);
+
+        if ( inc > 0 )
+            masterInitStarting16ths = pMasterClipItem->pClipModel->starting16th;
+
+        if ( inc >= 0 )
+            pClipModel->setStarting16th( inc );
+
+        QPointF newPos = value.toPointF();
+        newPos.setX( calculateXPos() );
+        newPos.setY( 0 );
+
+        return newPos;
+    }
+
+    return QGraphicsItem::itemChange( change, value );
+}

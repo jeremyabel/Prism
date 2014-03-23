@@ -118,6 +118,28 @@ void MainWindow::on_timelineClipGrabbed( ClipItem *clip )
     m_pDraggingClip = clip;
     connect( m_pDraggingClip, SIGNAL(xChanged()), SLOT(on_timelineClipMoved()) );
     connect( m_pDraggingClip, SIGNAL(yChanged()), SLOT(on_timelineClipMoved()) );
+
+    // Lock clips to their current track if we've selected multiple things
+    for ( int i = 0; i < m_pScene->selectedItems().length(); i++ )
+    {
+        ClipItem* pClip = dynamic_cast<ClipItem*>(m_pScene->selectedItems()[i]);
+
+        pClip->bLocked = m_pScene->selectedItems().size() > 1;
+
+        // Other selected clips are subservient to this one
+        if ( pClip != m_pDraggingClip && m_pScene->selectedItems().size() > 1 )
+        {
+            pClip->pMasterClipItem = m_pDraggingClip;
+            pClip->masterInitStarting16ths = -1;
+            pClip->bMultiSelected = true;
+        }
+        else
+        {
+            pClip->pMasterClipItem = NULL;
+            pClip->masterInitStarting16ths = -1;
+            pClip->bMultiSelected = false;
+        }
+    }
 }
 
 
@@ -139,7 +161,7 @@ void MainWindow::on_timelineClipReleased()
 {
     TrackItem* targetTrackItem = (TrackItem*)m_pDraggingClip->parentObject();
 
-    if ( !m_pDraggingClip->bMoved || m_bDialogOpen )
+    if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
         return;
 
     // Remove from old parent track
@@ -161,7 +183,7 @@ void MainWindow::on_timelineClipReleased()
     // Clean up
     disconnect( m_pDraggingClip, SIGNAL(xChanged()), 0, 0 );
     disconnect( m_pDraggingClip, SIGNAL(yChanged()), 0, 0 );
-    m_pDraggingClip   = NULL;
+    m_pDraggingClip  = NULL;
     m_pOriginalTrack = NULL;
     m_pHoverTrack    = NULL;
 }
@@ -169,6 +191,10 @@ void MainWindow::on_timelineClipReleased()
 
 void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
 {
+    // Disable if we've selected multiple clips
+    if ( m_pScene->selectedItems().size() > 1 )
+        return;
+
     qDebug() << "Opening clip dialog...";
 
     m_bDialogOpen = true;
@@ -216,58 +242,4 @@ void MainWindow::on_timelineClipMoved()
            break;
        }
     }
-
-    // Handle hovering over tracks
-    /*
-    if ( hoverTrack != NULL )
-    {
-        ClipItem* hoverClip = hoverTrack->getClipUnderMouse();
-
-        // Handle hovering over a clip
-        if ( hoverClip != NULL )
-        {
-            //qDebug() << "We're over a clip starting at" << hoverClip->pClipModel->iStarting16th
-            //         << "in the track" << m_pTrackItems[hoverClip->pClipModel->iTrack]->pTrackModel->sName;
-
-            // What side of the clip are we on?
-            if ( hoverClip->boundingRect().width() < m_draggingClip->boundingRect().width() )
-            {
-                float fDist = cursor.x() - ( hoverClip->boundingRect().center().x() + hoverClip->pos().x() );
-
-                if ( fDist < -3.0f )
-                    qDebug() << "LEFT";
-                else if ( fDist > 3.0f )
-                    qDebug() << "RIGHT";
-                else
-                    qDebug() << "";
-            }
-        }
-        else
-        {
-            // Find closest items on either side
-            ClipItem* pClosestLeftItem  = hoverTrack->getClipToLeftOfPoint(  cursor );
-            ClipItem* pClosestRightItem = hoverTrack->getClipToRightOfPoint( cursor );
-
-            if ( pClosestLeftItem != NULL && pClosestLeftItem->isObscuredBy( m_draggingClip ) )
-            {
-                m_pLeftIntersectClip = pClosestLeftItem;
-                qDebug() << pClosestLeftItem->pClipModel->starting16th;
-            }
-            else
-            {
-                m_pLeftIntersectClip = NULL;
-            }
-
-            if ( pClosestRightItem != NULL && pClosestRightItem->isObscuredBy( m_draggingClip ) )
-            {
-                m_pRightIntersectClip = pClosestRightItem;
-                qDebug() << pClosestRightItem->pClipModel->starting16th;
-            }
-            else
-            {
-                m_pRightIntersectClip = NULL;
-            }
-        }
-    }
-    */
 }
