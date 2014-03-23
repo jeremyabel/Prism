@@ -13,5 +13,3 @@ Todo
 	- Track context menu
 		- Add clip
 		- Remove track
-	- Clip highlighting
-	- Drag rect multi-clip selection
