@@ -19,9 +19,9 @@ TrackItem::TrackItem( TrackModel *trackModel )
 void TrackItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
     // Draw title
-    painter->setFont( QFont( "Helvetica", 10 ) );
+    painter->setFont( QFont( "Monaco", 10 ) );
     painter->setPen( QColor(160, 160, 160) );
-    painter->drawText( -TRACK_TITLE_MARGIN, 3, TRACK_TITLE_WIDTH, TRACK_HEIGHT, Qt::AlignRight, pTrackModel->sName );
+    painter->drawText( -TRACK_TITLE_MARGIN, 2, TRACK_TITLE_WIDTH, TRACK_HEIGHT, Qt::AlignRight, pTrackModel->sName );
 
     // Draw right rule
     painter->setPen( QColor(20, 20, 20) );
