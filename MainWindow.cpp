@@ -173,7 +173,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
 
     m_bDialogOpen = true;
 
-    m_pClipDialog = new ClipParamDialog( clip->pClipModel, this );
+    m_pClipDialog = new ClipParamDialog( *clip->pClipModel, this );
     m_pClipDialog->show();
 }
 

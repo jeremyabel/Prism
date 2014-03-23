@@ -1,11 +1,11 @@
 #include <QDebug>
 #include "ClipParamDialog.h"
 
-ClipParamDialog::ClipParamDialog( ClipModel* clip, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog), originalClip(*new ClipModel(clip))
+ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog), originalClip(clip)
 {
     ui->setupUi(this);
 
-    editingClip  = clip;
+    editingClip  = &clip;
     okOnLeft     = false;
 
 #ifdef Q_WS_WIN
@@ -15,79 +15,76 @@ ClipParamDialog::ClipParamDialog( ClipModel* clip, QWidget *parent ) : QDialog(p
     ui->buttonRight->setText( tr("Cancel") );
 #endif
 
+    // Enable UI bits
+    ui->catCheckBox->setChecked(            editingClip->enableCategory );
+    ui->catComboBox->setEnabled(            editingClip->enableCategory );
+
+    ui->subcatCheckBox->setChecked(         editingClip->enableSubCategory );
+    ui->subcatComboBox->setEnabled(         editingClip->enableSubCategory );
+
+    ui->colorCheckBox->setChecked(          editingClip->enableColor );
+    ui->colorComboBox->setEnabled(          editingClip->enableColor );
+
+    ui->sizeCheckBox->setChecked(           editingClip->enableSize );
+    ui->sizeHorizontalSlider->setEnabled(   editingClip->enableSize );
+
+    ui->ageCheckBox->setChecked(            editingClip->enableAge );
+    ui->ageComboBox->setEnabled(            editingClip->enableAge );
+
+    ui->brokenCheckBox->setChecked(         editingClip->enableBroken );
+    ui->brokenRadioButtonYes->setEnabled(   editingClip->enableBroken );
+    ui->brokenRadioButtonNo->setEnabled(    editingClip->enableBroken );
+
+    ui->missingCheckBox->setChecked(        editingClip->enableMissingParts );
+    ui->missingRadioButtonYes->setEnabled(  editingClip->enableMissingParts );
+    ui->missingRadioButtonNo->setEnabled(   editingClip->enableMissingParts );
+
+    ui->batCheckBox->setChecked(            editingClip->enableBatteries );
+    ui->batRadioButtonYes->setEnabled(      editingClip->enableBatteries );
+    ui->batRadioButtonNo->setEnabled(       editingClip->enableBatteries );
+
+
     if ( editingClip->enableCategory )
     {
 
     }
-    else
-         ui->catComboBox->setEnabled( false );
-
 
     if ( editingClip->enableSubCategory )
     {
 
     }
-    else
-        ui->subcatComboBox->setEnabled( false );
-
 
     if ( editingClip->enableColor )
     {
 
-    }
-    else
-        ui->colorComboBox->setEnabled( false );
-
+    }        
 
     if ( editingClip->enableSize )
     {
 
     }
-    else
-        ui->sizeHorizontalSlider->setEnabled( false );
-
 
     if ( editingClip->enableAge )
     {
 
     }
-    else
-        ui->ageComboBox->setEnabled( false );
-
 
     if ( editingClip->enableBroken )
     {
         ui->brokenRadioButtonYes->setChecked( editingClip->broken );
         ui->brokenRadioButtonNo->setChecked( !editingClip->broken );
     }
-    else
-    {
-        ui->brokenRadioButtonYes->setEnabled( false );
-        ui->brokenRadioButtonNo->setEnabled(  false );
-    }
-
 
     if ( editingClip->enableMissingParts )
     {
         ui->missingRadioButtonYes->setChecked( editingClip->missingParts );
         ui->missingRadioButtonNo->setChecked( !editingClip->missingParts );
     }
-    else
-    {
-        ui->missingRadioButtonYes->setEnabled( false );
-        ui->missingRadioButtonNo->setEnabled(  false );
-    }
-
 
     if ( editingClip->enableBatteries )
     {
         ui->batRadioButtonYes->setChecked( editingClip->batteries );
         ui->batRadioButtonNo->setChecked( !editingClip->batteries );
-    }
-    else
-    {
-        ui->batRadioButtonYes->setEnabled( false );
-        ui->batRadioButtonNo->setEnabled(  false );
     }
 }
 
@@ -193,4 +190,6 @@ void ClipParamDialog::on_buttonLeft_clicked()
 void ClipParamDialog::restoreClip()
 {
     qDebug() << "Restore clip";
+
+    *editingClip = originalClip;
 }

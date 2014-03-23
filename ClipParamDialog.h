@@ -11,16 +11,16 @@ class ClipParamDialog : public QDialog, public Ui::ClipParamDialog
     Q_OBJECT
 
 public:
-    explicit ClipParamDialog( ClipModel* clip, QWidget *parent = 0 );
+    ClipParamDialog( ClipModel& clip, QWidget *parent = 0 );
 
 private:
     void restoreClip();
 
     Ui::ClipParamDialog* ui;
 
-    ClipModel*  editingClip;
-    ClipModel   originalClip;
-    bool        okOnLeft;
+    ClipModel*          editingClip;
+    ClipModel           originalClip;
+    bool                okOnLeft;
 
 signals:
 

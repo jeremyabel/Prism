@@ -28,30 +28,6 @@ public:
        batteries            = false;
     }
 
-    ClipModel( ClipModel* clip )
-    {
-        starting16th         = clip->starting16th;
-        length16th           = clip->length16th;
-        ending16th           = clip->starting16th + clip->length16th;
-
-        enableCategory       = clip->enableCategory;
-        enableSubCategory    = clip->enableSubCategory;
-        enableColor          = clip->enableColor;
-        enableAge            = clip->enableAge;
-        enableSize           = clip->enableSize;
-        enableBroken         = clip->enableBroken;
-        enableMissingParts   = clip->enableMissingParts;
-        enableBatteries      = clip->enableBatteries;
-
-        subCategory          = clip->subCategory;
-        color                = clip->color;
-        year                 = clip->year;
-        size                 = clip->size;
-        broken               = clip->broken;
-        missingParts         = clip->missingParts;
-        batteries            = clip->batteries;
-    }
-
     void setStarting16th( int value )
     {
         starting16th    = value;
