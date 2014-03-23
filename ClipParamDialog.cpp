@@ -1,7 +1,7 @@
 #include <QDebug>
 #include "ClipParamDialog.h"
 
-ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog), originalClip(clip)
+ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog)
 {
     ui->setupUi(this);
 
@@ -174,22 +174,15 @@ void ClipParamDialog::on_batCheckBox_stateChanged( int value )
 void ClipParamDialog::on_buttonRight_clicked()
 {
     if ( okOnLeft )
-        restoreClip();
-
-    this->close();
+        reject();
+    else
+        accept();
 }
 
 void ClipParamDialog::on_buttonLeft_clicked()
 {
     if ( !okOnLeft )
-        restoreClip();
-
-    this->close();
-}
-
-void ClipParamDialog::restoreClip()
-{
-    qDebug() << "Restore clip";
-
-    *editingClip = originalClip;
+        reject();
+    else
+        accept();
 }

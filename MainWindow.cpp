@@ -173,8 +173,17 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
 
     m_bDialogOpen = true;
 
-    m_pClipDialog = new ClipParamDialog( *clip->pClipModel, this );
-    m_pClipDialog->show();
+    ClipModel origClip = *clip->pClipModel;
+    ClipParamDialog* pClipDialog = new ClipParamDialog( *clip->pClipModel, this );
+
+    if ( pClipDialog->exec() == 0 )
+    {
+        // Restore
+        qDebug() << "Restoring";
+        *clip->pClipModel = origClip;
+    }
+
+    qDebug() << "Dialog closed";
 }
 
 

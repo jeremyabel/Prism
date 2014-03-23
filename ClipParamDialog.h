@@ -14,13 +14,10 @@ public:
     ClipParamDialog( ClipModel& clip, QWidget *parent = 0 );
 
 private:
-    void restoreClip();
-
     Ui::ClipParamDialog* ui;
 
-    ClipModel*          editingClip;
-    ClipModel           originalClip;
-    bool                okOnLeft;
+    ClipModel*  editingClip;
+    bool        okOnLeft;
 
 signals:
 

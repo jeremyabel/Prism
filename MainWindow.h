@@ -44,7 +44,6 @@ private:
     ClipItem*               m_pDraggingClip;
     TrackItem*              m_pOriginalTrack;
     TrackItem*              m_pHoverTrack;
-    ClipParamDialog*        m_pClipDialog;
 
     float                   m_fSpacing;
     int                     m_iDivisions;
