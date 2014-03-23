@@ -17,10 +17,6 @@ public:
 
     QRectF          boundingRect() const;
     void            paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
-    ClipItem*       getClipUnderMouse();
-    ClipItem*       getClipToLeftOfPoint(  QPoint p );
-    ClipItem*       getClipToRightOfPoint( QPoint p );
-    void            offsetClips( int starting16th, int offset16ths );
 
     TrackModel*     pTrackModel;
 
