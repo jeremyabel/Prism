@@ -247,6 +247,33 @@ void MainWindow::on_timelineClipMoved()
     }
 }
 
+void MainWindow::keyPressEvent( QKeyEvent *event )
+{
+    if ( m_pScene->selectedItems().size() > 0 )
+    {
+        if ( event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace )
+        {
+            qDebug() << "Deleting clips";
+
+            while ( m_pScene->selectedItems().size() > 0 )
+            {
+                ClipItem*  clipItem  = dynamic_cast<ClipItem*>(m_pScene->selectedItems()[0]);
+                TrackItem* trackItem = dynamic_cast<TrackItem*>(clipItem->parentItem());
+
+                disconnect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   0, 0 );
+                disconnect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     0, 0 );
+                disconnect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), 0, 0 );
+                disconnect( clipItem, SIGNAL( detached() ),             0, 0 );
+
+                trackItem->pTrackModel->remove( clipItem->pClipModel );
+                m_pClipItems.removeAt(m_pClipItems.indexOf(clipItem));
+                m_pScene->removeItem( clipItem );
+            }
+        }
+    }
+}
+
+
 //------------------------------------------------------------------------------------------------------
 // Menu Actions
 //------------------------------------------------------------------------------------------------------
