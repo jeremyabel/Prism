@@ -6,7 +6,6 @@
 #include <QGraphicsView>
 #include <QList>
 
-#include "ClipParamDialog.h"
 #include "ClipModel.h"
 #include "ClipItem.h"
 #include "TrackItem.h"
@@ -33,6 +32,10 @@ private slots:
     void                    on_timelineClipDoubleClicked( ClipItem* clip );
     void                    on_timelineClipMoved();
     void                    on_timelineClipDetached();
+
+    void on_actionAdd_Track_triggered();
+
+    void on_actionDelete_Track_triggered();
 
 private:
     Ui::MainWindow*         ui;

@@ -12,6 +12,7 @@ class ClipParamDialog : public QDialog, public Ui::ClipParamDialog
 
 public:
     ClipParamDialog( ClipModel& clip, QWidget *parent = 0 );
+    ~ClipParamDialog();
 
 private:
     Ui::ClipParamDialog* ui;

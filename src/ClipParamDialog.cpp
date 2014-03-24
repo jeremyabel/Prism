@@ -88,6 +88,12 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(p
     }
 }
 
+ClipParamDialog::~ClipParamDialog()
+{
+    delete ui;
+}
+
+
 void ClipParamDialog::on_catCheckBox_stateChanged( int value )
 {
     qDebug() << "Category toggle state:" << value;

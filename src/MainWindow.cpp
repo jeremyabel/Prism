@@ -6,6 +6,9 @@
 #include <QRectF>
 #include <math.h>
 
+#include "ClipParamDialog.h"
+#include "AddTrackDialog.h"
+#include "RemoveTrackDialog.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
@@ -51,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // Add track item
         TrackItem* item = m_pTrackItems[i];
         item->setX( m_pScene->sceneRect().left() + iOffset );
-        item->setY( m_pTimeline->boundingRect().height() + ( i * item->boundingRect().height() ) + iOffset );
+        item->setY( m_pTimeline->boundingRect().height() + i * ( item->boundingRect().height() + iOffset ) );
 
         // Draw horizontal divider
         float fYPos  = item->pos().y() + item->boundingRect().height();
@@ -242,4 +245,41 @@ void MainWindow::on_timelineClipMoved()
            break;
        }
     }
+}
+
+
+void MainWindow::on_actionAdd_Track_triggered()
+{
+    qDebug() << "Add track...";
+
+    // Show dialog
+    QString defaultName = tr("track ") + QString::number(m_pTrackItems.size() + 1);
+    AddTrackDialog* pAddDialog = new AddTrackDialog( defaultName, this );
+
+    // Check results
+    if ( pAddDialog->exec() > 0 )
+    {
+        qDebug() << "Adding track" << pAddDialog->newNameString;
+
+        // Create new track item + graphics
+        TrackModel* pTrackModel = new TrackModel( pAddDialog->newNameString, QColor( Qt::yellow ) );
+        m_pTrackItems.append( new TrackItem( pTrackModel ) );
+
+        // Add track item
+        TrackItem* item = m_pTrackItems.last();
+        item->setX( m_pScene->sceneRect().left() + 1 );
+        item->setY( m_pTimeline->boundingRect().height() + ( (m_pTrackItems.length() - 1) * item->boundingRect().height() + 3 ) );
+        m_pScene->addItem( item );
+
+        // Draw horizontal divider
+        float fYPos  = item->pos().y() + item->boundingRect().height();
+        float fWidth = m_pTimeline->boundingRect().width();
+        m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
+    }
+}
+
+
+void MainWindow::on_actionDelete_Track_triggered()
+{
+    qDebug() << "Remove track...";
 }
