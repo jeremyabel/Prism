@@ -365,7 +365,7 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
     QAction* selectedItem = contextMenu.exec( globalPos );
     if ( selectedItem )
     {
-        TrackItem* hoverTrack;
+        TrackItem* hoverTrack = NULL;
 
         // See which track we're over
         for ( int i = 0; i < m_pTrackItems.length(); i++ )

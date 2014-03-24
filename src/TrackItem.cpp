@@ -18,6 +18,9 @@ TrackItem::TrackItem( TrackModel *trackModel )
 
 void TrackItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
     // Draw title
     painter->setFont( QFont( "Monaco", 10 ) );
     painter->setPen( QColor(160, 160, 160) );

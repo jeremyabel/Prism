@@ -30,6 +30,9 @@ QRectF ClipItem::boundingRect() const
 
 void ClipItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+
     m_fWidth = pClipModel->length16th * ( m_fSpacing / (float)m_iInvDivisions );
 
     // Draw clip rect
