@@ -365,5 +365,37 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
     QAction* selectedItem = contextMenu.exec( globalPos );
     if ( selectedItem )
     {
+        TrackItem* hoverTrack;
+
+        // See which track we're over
+        for ( int i = 0; i < m_pTrackItems.length(); i++ )
+        {
+           TrackItem* item = m_pTrackItems[i];
+
+           // Extend bounding rect to the end of the timeline
+           QRectF bounds = item->boundingRect();
+           bounds.setWidth( bounds.width() + m_pTimeline->boundingRect().width() );
+
+           // Exit if we're over this one
+           if ( bounds.contains( ui->graphicsView->mapFromGlobal(globalPos) ) )
+           {
+               hoverTrack = m_pTrackItems[i];
+               break;
+           }
+        }
+
+        if ( !hoverTrack )
+            return;
+
+        // Selected option = Remove Track
+        if ( QString::compare(selectedItem->text(), tr("Remove Track")) == 0 )
+        {
+            // Show remove track dialog
+            RemoveTrackDialog* removeDialog = new RemoveTrackDialog( hoverTrack->pTrackModel->sName, this );
+            if ( removeDialog->exec() > 0 )
+            {
+                qDebug() << "Removing track" << hoverTrack->pTrackModel->sName;
+            }
+        }
     }
 }
