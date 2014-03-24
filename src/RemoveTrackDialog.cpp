@@ -4,7 +4,7 @@
 RemoveTrackDialog::RemoveTrackDialog( QString trackName, QWidget *parent ) : QDialog(parent), ui(new Ui::RemoveTrackDialog)
 {
     ui->setupUi(this);
-    ui->label->setText( ui->label->text() + trackName );
+    ui->label->setText( ui->label->text() + trackName + "?" );
 }
 
 RemoveTrackDialog::~RemoveTrackDialog()
