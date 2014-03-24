@@ -9,6 +9,7 @@ Todo
 		- New
 		- Open
 		- Save / Save As
+		- Import
 		- Export
 	- Track context menu
 		- Add clip
