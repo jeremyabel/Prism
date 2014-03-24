@@ -9,6 +9,9 @@ const int TRACK_HEIGHT = 15;
 ClipItem::ClipItem( ClipModel* clipModel, QGraphicsItem *parent ) : QGraphicsObject( parent )
 {
     m_fWidth                = 0;
+    m_bExtendLeft           = false;
+    m_bExtendRight          = false;
+
     bDetached               = false;
     bMoved                  = false;
     bLocked                 = false;
@@ -19,6 +22,8 @@ ClipItem::ClipItem( ClipModel* clipModel, QGraphicsItem *parent ) : QGraphicsObj
     setFlag( QGraphicsItem::ItemIsSelectable );
     setFlag( QGraphicsItem::ItemIsMovable );
     setFlag( QGraphicsItem::ItemSendsGeometryChanges );
+
+    setAcceptHoverEvents( true );
 }
 
 
@@ -146,8 +151,36 @@ void ClipItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 }
 
 
+void ClipItem::hoverMoveEvent( QGraphicsSceneHoverEvent *event )
+{
+    QGraphicsItem::hoverMoveEvent( event );
+    setFocus( Qt::MouseFocusReason );
+
+    // Enable dragging to extend
+    m_bExtendLeft  = event->scenePos().x() - pos().x() < 5;
+    m_bExtendRight = event->scenePos().x() - pos().x() - m_fWidth > -7;
+
+    if ( m_bExtendLeft || m_bExtendRight )
+        setCursor( QCursor(Qt::SizeHorCursor) );
+    else
+        setCursor( QCursor(Qt::ArrowCursor) );
+}
+
+
+void ClipItem::hoverLeaveEvent( QGraphicsSceneHoverEvent *event )
+{
+    QGraphicsItem::hoverLeaveEvent( event );
+
+    m_bExtendLeft  = false;
+    m_bExtendRight = false;
+
+    setCursor( QCursor(Qt::ArrowCursor) );
+}
+
+
 QVariant ClipItem::itemChange( GraphicsItemChange change, const QVariant &value )
 {
+    // Apply master offset for multi-selection groups
     if ( change == ItemPositionChange && scene() && bMultiSelected && pMasterClipItem )
     {
         // Original offset
