@@ -45,6 +45,9 @@
     </item>
     <item>
      <widget class="QGraphicsView" name="graphicsView">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
@@ -119,7 +122,6 @@
      <string>Track</string>
     </property>
     <addaction name="actionAdd_Track"/>
-    <addaction name="actionDelete_Track"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -177,11 +179,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
-   </property>
-  </action>
-  <action name="actionDelete_Track">
-   <property name="text">
-    <string>Delete Track</string>
    </property>
   </action>
   <action name="actionImport">

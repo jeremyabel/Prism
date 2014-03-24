@@ -247,6 +247,45 @@ void MainWindow::on_timelineClipMoved()
     }
 }
 
+//------------------------------------------------------------------------------------------------------
+// Menu Actions
+//------------------------------------------------------------------------------------------------------
+
+void MainWindow::on_actionNew_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionOpen_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionSave_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionSave_As_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionImport_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionExport_triggered()
+{
+
+}
+
 
 void MainWindow::on_actionAdd_Track_triggered()
 {
@@ -279,7 +318,25 @@ void MainWindow::on_actionAdd_Track_triggered()
 }
 
 
-void MainWindow::on_actionDelete_Track_triggered()
+//------------------------------------------------------------------------------------------------------
+// Context Menu Actions
+//------------------------------------------------------------------------------------------------------
+
+void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
 {
-    qDebug() << "Remove track...";
+    qDebug() << "Show context menu";
+
+    if ( m_pScene->selectedItems().size() > 0 )
+        return;
+
+    QPoint globalPos = ui->graphicsView->mapToGlobal(pos);
+
+    QMenu contextMenu;
+    contextMenu.addAction( "Add Clip" );
+    contextMenu.addAction( "Remove Track" );
+
+    QAction* selectedItem = contextMenu.exec( globalPos );
+    if ( selectedItem )
+    {
+    }
 }

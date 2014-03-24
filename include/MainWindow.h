@@ -23,6 +23,8 @@ class MainWindow : public QMainWindow
 public:
     explicit                MainWindow( QWidget *parent = 0 );
 
+    void                    keyPressEvent( QKeyEvent *event );
+
     ~MainWindow();
 
 private slots:
@@ -33,9 +35,15 @@ private slots:
     void                    on_timelineClipMoved();
     void                    on_timelineClipDetached();
 
-    void on_actionAdd_Track_triggered();
+    void                    on_actionNew_triggered();
+    void                    on_actionOpen_triggered();
+    void                    on_actionSave_triggered();
+    void                    on_actionSave_As_triggered();
+    void                    on_actionImport_triggered();
+    void                    on_actionExport_triggered();
+    void                    on_actionAdd_Track_triggered();
 
-    void on_actionDelete_Track_triggered();
+    void                    on_graphicsView_customContextMenuRequested( const QPoint &pos );
 
 private:
     Ui::MainWindow*         ui;
