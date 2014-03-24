@@ -20,6 +20,7 @@ SOURCES += src/main.cpp\
     src/TimelineItem.cpp \
     src/TrackModel.cpp \
     src/AddTrackDialog.cpp \
+    src/RemoveTrackDialog.cpp
 
 HEADERS  += include/ClipItem.h \
     include/TrackItem.h \
@@ -29,7 +30,9 @@ HEADERS  += include/ClipItem.h \
     include/TimelineItem.h \
     include/TrackModel.h \
     include/AddTrackDialog.h \
+    include/RemoveTrackDialog.h
 
 FORMS    += forms/MainWindow.ui \
     forms/ClipParamDialog.ui \
     forms/AddTrackDialog.ui \
+    forms/RemoveTrackDialog.ui
