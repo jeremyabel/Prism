@@ -253,7 +253,7 @@ void MainWindow::keyPressEvent( QKeyEvent *event )
     {
         if ( event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace )
         {
-            qDebug() << "Deleting clips";
+            qDebug() << "Deleting clip(s)";
 
             while ( m_pScene->selectedItems().size() > 0 )
             {

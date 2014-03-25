@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "ClipItem.h"
+#include "TrackItem.h"
 
 const int       TRACK_HEIGHT         = 15;
 const float     TRACK_DRAG_MIN_WIDTH = 9.0f;
@@ -104,6 +105,24 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
     if ( m_bExtendLeft || m_bExtendRight )
     {
+        TrackItem* track     = dynamic_cast<TrackItem*>(parentItem());
+        ClipModel* leftClip  = track->pTrackModel->getLeftClip(  pClipModel );
+        ClipModel* rightClip = track->pTrackModel->getRightClip( pClipModel );
+
+        // Clamp to end of left-most clip
+        if ( leftClip && QCursor::pos().x() - m_prevCursorPos.x() < 0 )
+        {
+            if ( pClipModel->starting16th <= leftClip->ending16th )
+                return;
+        }
+
+        // Clamp to start of right-most clip
+        if ( rightClip && QCursor::pos().x() - m_prevCursorPos.x() >= 0 )
+        {
+            if ( pClipModel->ending16th >= rightClip->starting16th )
+                return;
+        }
+
         int deltaX      = QCursor::pos().x() - m_clickCursorPos.x();
         int delta16ths  = (int)roundf((float)deltaX / m_fSpacing16ths);
 
@@ -122,7 +141,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
         update();
     }
-    else
+    else    // Normal drag behavior
     {
         QGraphicsItem::mouseMoveEvent( event );
 
@@ -146,9 +165,9 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 
         // Clamp
         setY( clamp( pos().y(), 0, INFINITY ) );
-
-        m_prevCursorPos = QCursor::pos();
     }
+
+    m_prevCursorPos = QCursor::pos();
 }
 
 

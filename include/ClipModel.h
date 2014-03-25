@@ -28,13 +28,13 @@ public:
        batteries            = false;
     }
 
-    void setStarting16th( int value )
+    void setStarting16th( int value, bool force = false )
     {
-        if ( value >= ending16th )
+        if ( value >= ending16th && !force )
             return;
 
-        starting16th    = value;
-        ending16th      = starting16th + length16th;
+        starting16th = value;
+        ending16th   = starting16th + length16th;
     }
 
     void setEnding16th( int value )

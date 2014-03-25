@@ -18,8 +18,8 @@ public:
 
     void                insert( ClipModel* clip );
     void                remove( ClipModel* clip );
-    ClipModel*          getLeftClip(  ClipModel* clip, bool greedy = false );
-    ClipModel*          getRightClip( ClipModel* clip, bool greedy = false );
+    ClipModel*          getLeftClip(  ClipModel* clip );
+    ClipModel*          getRightClip( ClipModel* clip );
 
     QString             sName;
     QList<ClipModel*>   pClips;

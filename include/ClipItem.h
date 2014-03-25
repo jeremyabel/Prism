@@ -8,6 +8,7 @@
 #include <QRectF>
 
 #include "ClipModel.h"
+#include "TrackModel.h"
 #include "ui_ClipParamDialog.h"
 
 class ClipItem : public QGraphicsObject
@@ -41,10 +42,10 @@ signals:
 protected:
     void            paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
-    void            mousePressEvent(        QGraphicsSceneMouseEvent *event );
-    void            mouseMoveEvent(         QGraphicsSceneMouseEvent *event );
-    void            mouseReleaseEvent(      QGraphicsSceneMouseEvent *event );
-    void            mouseDoubleClickEvent(  QGraphicsSceneMouseEvent *event );
+    virtual void    mousePressEvent(        QGraphicsSceneMouseEvent *event );
+    virtual void    mouseMoveEvent(         QGraphicsSceneMouseEvent *event );
+    virtual void    mouseReleaseEvent(      QGraphicsSceneMouseEvent *event );
+    virtual void    mouseDoubleClickEvent(  QGraphicsSceneMouseEvent *event );
     virtual void    hoverMoveEvent(         QGraphicsSceneHoverEvent *event );
     virtual void    hoverLeaveEvent(        QGraphicsSceneHoverEvent *event );
     QVariant        itemChange(             GraphicsItemChange change, const QVariant &value );
