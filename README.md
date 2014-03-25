@@ -14,3 +14,6 @@ Todo
 	- Track context menu
 		- Add clip
 		- Remove track
+		- Rename track
+	- Track
+		- Double click to rename
