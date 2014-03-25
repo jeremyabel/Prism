@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QList>
 
 #include "TrackModel.h"
 
@@ -56,27 +57,36 @@ void TrackModel::remove( ClipModel *clip )
 }
 
 
-ClipModel* TrackModel::getLeftClip( ClipModel *clip )
+ClipModel* TrackModel::getLeftClip( ClipModel *clip, bool greedy )
 {
-    ClipModel *result = NULL;
+    QList<ClipModel*> results;
 
     for ( int i = 0; i < pClips.length(); i++ )
     {
-        if ( result == NULL && pClips[i]->starting16th <= clip->starting16th )
-            result = pClips[i];
+        ClipModel* curResult = NULL;
 
-        if ( result != NULL &&
-             pClips[i]->starting16th > result->starting16th &&
-             pClips[i]->starting16th <=  clip->starting16th )
+        if ( results.size() <= 0 && pClips[i]->starting16th <= clip->starting16th )
+            curResult = pClips[i];
+
+        if ( curResult != NULL &&
+             pClips[i]->starting16th >  curResult->starting16th &&
+             pClips[i]->starting16th   <= clip->starting16th )
         {
-            result = pClips[i];
+            curResult = pClips[i];
         }
+
+        if ( result && result != clip && greedy )
+            break;
     }
+
+    if ( result == clip )
+        result = NULL;
+
     return result;
 }
 
 
-ClipModel* TrackModel::getRightClip( ClipModel *clip )
+ClipModel* TrackModel::getRightClip( ClipModel *clip, bool greedy )
 {
     ClipModel *result = NULL;
 
@@ -87,10 +97,17 @@ ClipModel* TrackModel::getRightClip( ClipModel *clip )
 
         if ( result != NULL &&
              pClips[i]->starting16th <  result->starting16th &&
-             pClips[i]->starting16th >=   clip->starting16th )
+             pClips[i]->starting16th >= clip->starting16th )
         {
             result = pClips[i];
         }
+
+        if ( result && result != clip && greedy )
+           break;
     }
+
+    if ( result == clip )
+        result = NULL;
+
     return result;
 }
