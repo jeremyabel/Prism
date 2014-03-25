@@ -113,16 +113,25 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
         if ( leftClip && QCursor::pos().x() - m_prevCursorPos.x() < 0 )
         {
             if ( pClipModel->starting16th <= leftClip->ending16th )
+            {
+                pClipModel->starting16th = leftClip->ending16th;
+                update();
                 return;
+            }
         }
 
         // Clamp to start of right-most clip
-        if ( rightClip && QCursor::pos().x() - m_prevCursorPos.x() >= 0 )
+        if ( rightClip && QCursor::pos().x() - m_prevCursorPos.x() > 0 )
         {
             if ( pClipModel->ending16th >= rightClip->starting16th )
+            {
+                pClipModel->ending16th = rightClip->starting16th;
+                update();
                 return;
+            }
         }
 
+        // Determine how much to adjust size
         int deltaX      = QCursor::pos().x() - m_clickCursorPos.x();
         int delta16ths  = (int)roundf((float)deltaX / m_fSpacing16ths);
 
