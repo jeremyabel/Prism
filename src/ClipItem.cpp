@@ -103,7 +103,7 @@ void ClipItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 
 void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    if ( m_bExtendLeft || m_bExtendRight )
+    if ( ( m_bExtendLeft || m_bExtendRight ) && !bMultiSelected && !bLocked )
     {
         TrackItem* track     = dynamic_cast<TrackItem*>(parentItem());
         ClipModel* leftClip  = track->pTrackModel->getLeftClip(  pClipModel );
