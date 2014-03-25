@@ -30,8 +30,20 @@ public:
 
     void setStarting16th( int value )
     {
+        if ( value >= ending16th )
+            return;
+
         starting16th    = value;
         ending16th      = starting16th + length16th;
+    }
+
+    void setEnding16th( int value )
+    {
+        if ( value <= starting16th )
+            return;
+
+        ending16th = value;
+        length16th = ending16th - starting16th;
     }
 
     int     starting16th;

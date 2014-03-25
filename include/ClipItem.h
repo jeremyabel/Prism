@@ -60,6 +60,7 @@ private:
     QPoint          m_prevCursorPos;
     QPoint          m_clickCursorPos;
     int             m_clickStarting16ths;
+    int             m_clickEnding16ths;
     bool            m_bExtendLeft;
     bool            m_bExtendRight;
 };

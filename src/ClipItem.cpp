@@ -4,7 +4,8 @@
 
 #include "ClipItem.h"
 
-const int TRACK_HEIGHT = 15;
+const int       TRACK_HEIGHT         = 15;
+const float     TRACK_DRAG_MIN_WIDTH = 9.0f;
 
 ClipItem::ClipItem( ClipModel* clipModel, QGraphicsItem *parent ) : QGraphicsObject( parent )
 {
@@ -29,7 +30,7 @@ ClipItem::ClipItem( ClipModel* clipModel, QGraphicsItem *parent ) : QGraphicsObj
 
 QRectF ClipItem::boundingRect() const
 {
-    return QRectF( 0, 0, m_fWidth, 15 );
+    return QRectF( 0, 0, m_fWidth, TRACK_HEIGHT );
 }
 
 
@@ -92,6 +93,7 @@ void ClipItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
     bMoved = false;
 
     m_clickStarting16ths = pClipModel->starting16th;
+    m_clickEnding16ths   = pClipModel->ending16th;
 
     QGraphicsItem::mousePressEvent( event );
     emit mouseDown( this );
@@ -100,30 +102,53 @@ void ClipItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
 
 void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
 {
-    QGraphicsItem::mouseMoveEvent( event );
-
-    bMoved = true;
-
-    // If it looks like the user is trying to drag the clip to another track, detach it.
-    // Otherwise, keep it here and snap to 16ths.
-    if ( ( abs( m_prevCursorPos.y()  - QCursor::pos().y() ) > 5 ||
-           abs( m_clickCursorPos.y() - QCursor::pos().y() ) > 7 ) && !bDetached && !bLocked )
+    if ( m_bExtendLeft || m_bExtendRight )
     {
-        bDetached = true;
-        this->setOpacity( 0.5f );
-        emit detached();
+        int deltaX      = QCursor::pos().x() - m_clickCursorPos.x();
+        int delta16ths  = (int)roundf((float)deltaX / m_fSpacing16ths);
+
+        if ( m_bExtendRight && pClipModel->length16th >= 1 && m_fWidth > TRACK_DRAG_MIN_WIDTH )
+        {
+            // Drag right side
+            pClipModel->setEnding16th( m_clickEnding16ths + delta16ths );
+        }
+        else if ( pClipModel->length16th >= 1 && m_fWidth > TRACK_DRAG_MIN_WIDTH )
+        {
+            // Drag left side
+            snapTo16ths( QCursor::pos().x() );
+            pClipModel->setEnding16th( m_clickEnding16ths );
+            setX( calculateXPos() );
+        }
+
+        update();
     }
-    else if ( !bDetached )
+    else
     {
-        snapTo16ths( QCursor::pos().x() );
-        setX( calculateXPos() );
-        setY( 0 );
+        QGraphicsItem::mouseMoveEvent( event );
+
+        bMoved = true;
+
+        // If it looks like the user is trying to drag the clip to another track, detach it.
+        // Otherwise, keep it here and snap to 16ths.
+        if ( ( abs( m_prevCursorPos.y()  - QCursor::pos().y() ) > 5 ||
+               abs( m_clickCursorPos.y() - QCursor::pos().y() ) > 7 ) && !bDetached && !bLocked )
+        {
+            bDetached = true;
+            this->setOpacity( 0.5f );
+            emit detached();
+        }
+        else if ( !bDetached )
+        {
+            snapTo16ths( QCursor::pos().x() );
+            setX( calculateXPos() );
+            setY( 0 );
+        }
+
+        // Clamp
+        setY( clamp( pos().y(), 0, INFINITY ) );
+
+        m_prevCursorPos = QCursor::pos();
     }
-
-    // Clamp
-    setY( clamp( pos().y(), 0, INFINITY ) );
-
-    m_prevCursorPos = QCursor::pos();
 }
 
 
@@ -135,12 +160,17 @@ void ClipItem::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
     this->setOpacity( 1.0f );
 
     // Snap to position
-    snapTo16ths( QCursor::pos().x() );
-    setPos( calculateXPos(), 0 );
+    if ( !m_bExtendLeft && !m_bExtendRight )
+    {
+        snapTo16ths( QCursor::pos().x() );
+        setPos( calculateXPos(), 0 );
+    }
 
     // Notify and reset
     emit mouseUp( this );
-    bLocked = false;
+    bLocked        = false;
+    m_bExtendLeft  = false;
+    m_bExtendRight = false;
 }
 
 
@@ -157,8 +187,8 @@ void ClipItem::hoverMoveEvent( QGraphicsSceneHoverEvent *event )
     setFocus( Qt::MouseFocusReason );
 
     // Enable dragging to extend
-    m_bExtendLeft  = event->scenePos().x() - pos().x() < 5;
-    m_bExtendRight = event->scenePos().x() - pos().x() - m_fWidth > -7;
+    m_bExtendLeft  = event->scenePos().x() - pos().x() < 3              && m_fWidth > TRACK_DRAG_MIN_WIDTH;
+    m_bExtendRight = event->scenePos().x() - pos().x() - m_fWidth > -3  && m_fWidth > TRACK_DRAG_MIN_WIDTH;
 
     if ( m_bExtendLeft || m_bExtendRight )
         setCursor( QCursor(Qt::SizeHorCursor) );
