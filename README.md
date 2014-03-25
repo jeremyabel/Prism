@@ -14,5 +14,3 @@ Todo
 	- Track context menu
 		- Add clip
 		- Remove track
-	- Clips
-		- Drag to extend
