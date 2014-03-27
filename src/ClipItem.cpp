@@ -59,11 +59,8 @@ void ClipItem::setZoomParams( float spacing, int divisions )
     m_fSpacing   = spacing;
     m_iDivisions = divisions;
 
-    if (      m_iDivisions == 1  )  m_iInvDivisions = 16;
-    else if ( m_iDivisions == 2  )  m_iInvDivisions = 8;
-    else if ( m_iDivisions == 4  )  m_iInvDivisions = 4;
-    else if ( m_iDivisions == 8  )  m_iInvDivisions = 2;
-    else if ( m_iDivisions == 16 )  m_iInvDivisions = 1;
+    if ( m_iDivisions > 0 )
+        m_iInvDivisions = 16 / m_iDivisions;
 
     m_fSpacing16ths = m_fSpacing / (float)m_iInvDivisions;
 

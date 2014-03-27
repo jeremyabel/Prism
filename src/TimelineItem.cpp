@@ -11,7 +11,7 @@ const int               TICK_HEIGHT = 15;
 TimelineItem::TimelineItem()
 {
     iMeasures = 100;
-    m_iWidth = 0;
+    m_iWidth  = 0;
     setZoomValue( 500 );
 }
 

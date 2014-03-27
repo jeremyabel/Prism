@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         // Add track item
         TrackItem* item = m_pTrackItems[i];
-        item->setX( m_pScene->sceneRect().left() + iOffset );
+        item->setX( m_pScene->sceneRect().left() );
         item->setY( m_pTimeline->boundingRect().height() + i * ( item->boundingRect().height() + iOffset ) );
         connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
 
@@ -83,7 +83,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem )
+void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool append )
 {
     ClipItem* clipItem = new ClipItem( clipModel );
     connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
@@ -96,7 +96,12 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem )
     clipItem->setObjectName( "clip_" + QString::number(m_pClipItems.size()) );
 
     m_pClipItems.append( clipItem );
-    m_pScene->addItem( clipItem );
+
+    clipItem->setZoomParams( m_fSpacing, m_iDivisions );
+    m_pScene->invalidate();
+
+    if ( append )
+        trackItem->pTrackModel->insert( clipModel );
 }
 
 
@@ -111,10 +116,13 @@ void MainWindow::on_timeZoomSlider_valueChanged(int value)
     else if ( value <= 650 )    m_iDivisions = 8;
     else if ( value <= 800 )    m_iDivisions = 16;
 
+    if ( m_iDivisions > 0 )
+        m_iInvDivisions = 16 / m_iDivisions;
+
     float minSpacing = (float)MIN_SPACING / (float)m_iDivisions;
     float maxSpacing = (float)MAX_SPACING / (float)m_iDivisions;
 
-    m_fSpacing = ( (float)value / 1000.0f ) * ( maxSpacing - minSpacing ) + minSpacing;
+    m_fSpacing = ((float)value / 1000.0f) * (maxSpacing - minSpacing) + minSpacing;
 
     // Update clips
     for ( int i = 0; i < m_pClipItems.length(); i++ )
@@ -306,6 +314,16 @@ void MainWindow::keyPressEvent( QKeyEvent *event )
 }
 
 
+int MainWindow::getNearest16th()
+{
+    // Get nearest 16th to cursor
+    QPointF offsetPt = ui->graphicsView->mapToScene( ui->graphicsView->mapFromGlobal(QCursor::pos()) );
+    int offsetX = (int)offsetPt.x() - 101;
+
+    return (int)((float)offsetX / m_fSpacing ) * m_iInvDivisions;
+}
+
+
 //------------------------------------------------------------------------------------------------------
 // Menu Actions
 //------------------------------------------------------------------------------------------------------
@@ -422,9 +440,11 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
         //Selected option = Add Clip
         if ( QString::compare(selectedItem->text(), tr("Add Clip")) == 0 )
         {
-            qDebug() << "Adding clip";
+            int nearest16th = getNearest16th();
+            ClipModel* pClipModel = new ClipModel(nearest16th, 4);
+            addClip( pClipModel, hoverTrack, true );
 
-            //ClipModel* pClipModel = new ClipModel( );
+            qDebug() << "Adding clip at " << nearest16th;
             return;
         }
 
@@ -437,7 +457,6 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
             {
                 qDebug() << "Removing track" << hoverTrack->pTrackModel->sName;
             }
-
             return;
         }
     }

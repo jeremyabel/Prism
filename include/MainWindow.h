@@ -47,7 +47,8 @@ private slots:
     void                    on_graphicsView_customContextMenuRequested( const QPoint &pos );
 
 private:
-    void                    addClip( ClipModel* clipModel, TrackItem* trackItem );
+    void                    addClip( ClipModel* clipModel, TrackItem* trackItem, bool append = false );
+    int                     getNearest16th();
 
     Ui::MainWindow*         ui;
 
