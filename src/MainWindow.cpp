@@ -9,6 +9,7 @@
 #include "ClipParamDialog.h"
 #include "AddTrackDialog.h"
 #include "RemoveTrackDialog.h"
+#include "RenameTrackDialog.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         TrackItem* item = m_pTrackItems[i];
         item->setX( m_pScene->sceneRect().left() + iOffset );
         item->setY( m_pTimeline->boundingRect().height() + i * ( item->boundingRect().height() + iOffset ) );
+        connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
 
         // Draw horizontal divider
         float fYPos  = item->pos().y() + item->boundingRect().height();
@@ -212,6 +214,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
         *clip->pClipModel = origClip;
     }
 
+    m_bDialogOpen = false;
     qDebug() << "Dialog closed";
 }
 
@@ -246,6 +249,29 @@ void MainWindow::on_timelineClipMoved()
        }
     }
 }
+
+
+void MainWindow::on_trackDoubleClicked( TrackItem *track )
+{
+    qDebug() << "Opening renaming dialog...";
+
+    m_bDialogOpen = true;
+
+    QString origTrackName = track->pTrackModel->sName;
+    RenameTrackDialog* pRenameDialog = new RenameTrackDialog( track->pTrackModel, this );
+
+    if ( pRenameDialog->exec() == 0 )
+    {
+        // Restore
+        qDebug() << "Restoring";
+        track->pTrackModel->sName = origTrackName;
+    }
+
+    track->update();
+    m_bDialogOpen = false;
+    qDebug() << "Dialog closed";
+}
+
 
 void MainWindow::keyPressEvent( QKeyEvent *event )
 {

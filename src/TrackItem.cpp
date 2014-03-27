@@ -51,5 +51,5 @@ void TrackItem::updateClips()
 void TrackItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
 {
     QGraphicsItem::mouseDoubleClickEvent( event );
-    emit mouseDouble( this );
+    emit mouseDouble(this);
 }

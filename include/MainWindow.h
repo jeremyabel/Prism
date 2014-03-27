@@ -34,6 +34,7 @@ private slots:
     void                    on_timelineClipDoubleClicked( ClipItem* clip );
     void                    on_timelineClipMoved();
     void                    on_timelineClipDetached();
+    void                    on_trackDoubleClicked( TrackItem* track );
 
     void                    on_actionNew_triggered();
     void                    on_actionOpen_triggered();

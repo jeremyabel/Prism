@@ -16,12 +16,18 @@ public:
     TrackItem( TrackModel *trackModel );
 
     QRectF          boundingRect() const;
-    void            paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
     TrackModel*     pTrackModel;
 
+signals:
+    void            mouseDouble( TrackItem* track );
+
 public slots:
     void            updateClips();
+
+protected:
+    virtual void    paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    virtual void    mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 
 private:
     QColor          m_clipColor;
