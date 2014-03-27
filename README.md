@@ -12,5 +12,4 @@ Todo
 		- Import
 		- Export
 	- Track context menu
-		- Add clip
 		- Remove track
