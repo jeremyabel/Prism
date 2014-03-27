@@ -67,18 +67,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // Add clips
         for ( int j = 0; j < item->pTrackModel->pClips.length(); j++ )
         {
-            ClipItem* clipItem = new ClipItem( item->pTrackModel->pClips[j] );
-            connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
-            connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased() ) );
-            connect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), SLOT( on_timelineClipDoubleClicked(ClipItem*) ) );
-            connect( clipItem, SIGNAL( detached() ),             SLOT( on_timelineClipDetached() ) );
-
-            clipItem->setParentItem( item );
-            clipItem->color = item->pTrackModel->qColor;
-            clipItem->setObjectName( "clip_" + QString::number( j * i ) );
-
-            m_pClipItems.append( clipItem );
-            m_pScene->addItem( clipItem );
+            addClip( item->pTrackModel->pClips[j], item );
         }
 
         m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
@@ -91,6 +80,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem )
+{
+    ClipItem* clipItem = new ClipItem( clipModel );
+    connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
+    connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased() ) );
+    connect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), SLOT( on_timelineClipDoubleClicked(ClipItem*) ) );
+    connect( clipItem, SIGNAL( detached() ),             SLOT( on_timelineClipDetached() ) );
+
+    clipItem->setParentItem( trackItem );
+    clipItem->color = trackItem->pTrackModel->qColor;
+    clipItem->setObjectName( "clip_" + QString::number(m_pClipItems.size()) );
+
+    m_pClipItems.append( clipItem );
+    m_pScene->addItem( clipItem );
 }
 
 
@@ -399,7 +405,7 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
            TrackItem* item = m_pTrackItems[i];
 
            // Extend bounding rect to the end of the timeline
-           QRectF bounds = item->boundingRect();
+           QRectF bounds = item->mapRectToParent( item->boundingRect() );
            bounds.setWidth( bounds.width() + m_pTimeline->boundingRect().width() );
 
            // Exit if we're over this one
@@ -413,6 +419,15 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
         if ( !hoverTrack )
             return;
 
+        //Selected option = Add Clip
+        if ( QString::compare(selectedItem->text(), tr("Add Clip")) == 0 )
+        {
+            qDebug() << "Adding clip";
+
+            //ClipModel* pClipModel = new ClipModel( );
+            return;
+        }
+
         // Selected option = Remove Track
         if ( QString::compare(selectedItem->text(), tr("Remove Track")) == 0 )
         {
@@ -422,6 +437,8 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
             {
                 qDebug() << "Removing track" << hoverTrack->pTrackModel->sName;
             }
+
+            return;
         }
     }
 }
