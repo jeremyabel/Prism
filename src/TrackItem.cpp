@@ -34,7 +34,7 @@ void TrackItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option
 
 QRectF TrackItem::boundingRect() const
 {
-    return QRectF( pos().x(), pos().y(), TRACK_TITLE_WIDTH + 1, TRACK_HEIGHT );
+    return QRectF( 0, 0, TRACK_TITLE_WIDTH + 1, TRACK_HEIGHT );
 }
 
 
@@ -46,4 +46,10 @@ void TrackItem::updateClips()
         item->color = this->pTrackModel->qColor;
         item->setX( item->calculateXPos() );
     }
+}
+
+void TrackItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent *event )
+{
+    QGraphicsItem::mouseDoubleClickEvent( event );
+    emit mouseDouble( this );
 }

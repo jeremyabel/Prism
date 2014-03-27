@@ -235,13 +235,13 @@ void MainWindow::on_timelineClipMoved()
        TrackItem* item = m_pTrackItems[i];
 
        // Extend bounding rect to the end of the timeline
-       QRectF bounds = item->boundingRect();
+       QRectF bounds = item->mapRectToParent( item->boundingRect() );
        bounds.setWidth( bounds.width() + m_pTimeline->boundingRect().width() );
 
        // Exit if we're over this one
        if ( bounds.contains( cursor ) )
        {
-           m_pHoverTrack = m_pTrackItems[i];
+           m_pHoverTrack = item;
            break;
        }
     }
