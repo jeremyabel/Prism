@@ -48,6 +48,7 @@ private slots:
 
 private:
     void                    addClip( ClipModel* clipModel, TrackItem* trackItem, bool append = false );
+    void                    removeTrack( TrackItem* track );
     int                     getNearest16th();
 
     Ui::MainWindow*         ui;
@@ -65,6 +66,7 @@ private:
     int                     m_iInvDivisions;
     int                     m_iMeasures;
     bool                    m_bDialogOpen;
+    bool                    m_bModified;
 };
 
 #endif // MAINWINDOW_H

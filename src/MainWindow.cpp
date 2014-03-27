@@ -19,8 +19,9 @@ const int               TICK_HEIGHT = 15;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
-    m_iMeasures   = 100;
-    m_bDialogOpen = false;
+    m_iMeasures     = 100;
+    m_bDialogOpen   = false;
+    m_bModified     = false;
 
     ui->setupUi(this);
 
@@ -54,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         // Add track item
         TrackItem* item = m_pTrackItems[i];
-        item->setX( m_pScene->sceneRect().left() );
+        item->setX( m_pScene->sceneRect().left() + iOffset );
         item->setY( m_pTimeline->boundingRect().height() + i * ( item->boundingRect().height() + iOffset ) );
         connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
 
@@ -70,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             addClip( item->pTrackModel->pClips[j], item );
         }
 
-        m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
+        item->pBottomLine = m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
     }
 
     on_timeZoomSlider_valueChanged( 500 );
@@ -102,6 +103,46 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
 
     if ( append )
         trackItem->pTrackModel->insert( clipModel );
+}
+
+
+void MainWindow::removeTrack( TrackItem *track )
+{
+    qDebug() << "Removing track" << track->pTrackModel->sName;
+
+    // Remove and clean up child clips
+    for ( int i = 0; i < track->childItems().size(); i++ )
+    {
+        QGraphicsItem* item = track->childItems()[i];
+        m_pScene->removeItem( item );
+
+        ClipItem* clipItem = dynamic_cast<ClipItem*>(item);
+
+        if ( clipItem && m_pClipItems.contains(clipItem) )
+        {
+            disconnect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   0, 0 );
+            disconnect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     0, 0 );
+            disconnect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), 0, 0 );
+            disconnect( clipItem, SIGNAL( detached() ),             0, 0 );
+
+            m_pClipItems.removeAt(m_pClipItems.indexOf(clipItem));
+        }
+    }
+
+    disconnect( track, SIGNAL( mouseDouble(TrackItem*) ), 0, 0 );
+
+    int trackIndex = m_pTrackItems.indexOf(track);
+    m_pTrackItems.removeAt( trackIndex );
+    m_pScene->removeItem( track->pBottomLine );
+    m_pScene->removeItem( track );
+
+    // Move other tracks up
+    for ( int i = trackIndex; i < m_pTrackItems.size(); i++ )
+    {
+        TrackItem* trackItem = m_pTrackItems[i];
+        trackItem->setPos( trackItem->pos().x(), trackItem->pos().y() - trackItem->boundingRect().height() - 1 );
+        trackItem->pBottomLine->setPos( trackItem->pBottomLine->pos().x(), trackItem->pBottomLine->pos().y() - trackItem->boundingRect().height() - 1 );
+    }
 }
 
 
@@ -401,8 +442,6 @@ void MainWindow::on_actionAdd_Track_triggered()
 
 void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
 {
-    qDebug() << "Show context menu";
-
     if ( m_pScene->selectedItems().size() > 0 )
         return;
 
@@ -412,31 +451,34 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
     contextMenu.addAction( "Add Clip" );
     contextMenu.addAction( "Remove Track" );
 
+    TrackItem* hoverTrack = NULL;
+
+    // See which track we're over
+    for ( int i = 0; i < m_pTrackItems.length(); i++ )
+    {
+       TrackItem* item = m_pTrackItems[i];
+
+       // Extend bounding rect to the end of the timeline
+       QRectF bounds = item->mapRectToParent( item->boundingRect() );
+       bounds.setWidth( bounds.width() + m_pTimeline->boundingRect().width() );
+
+       // Exit if we're over this one
+       if ( bounds.contains( ui->graphicsView->mapFromGlobal(globalPos) ) )
+       {
+           hoverTrack = m_pTrackItems[i];
+           break;
+       }
+    }
+
+    if ( !hoverTrack )
+        return;
+
+    qDebug() << "Show context menu";
     QAction* selectedItem = contextMenu.exec( globalPos );
+
+    // Evaluate selection option
     if ( selectedItem )
     {
-        TrackItem* hoverTrack = NULL;
-
-        // See which track we're over
-        for ( int i = 0; i < m_pTrackItems.length(); i++ )
-        {
-           TrackItem* item = m_pTrackItems[i];
-
-           // Extend bounding rect to the end of the timeline
-           QRectF bounds = item->mapRectToParent( item->boundingRect() );
-           bounds.setWidth( bounds.width() + m_pTimeline->boundingRect().width() );
-
-           // Exit if we're over this one
-           if ( bounds.contains( ui->graphicsView->mapFromGlobal(globalPos) ) )
-           {
-               hoverTrack = m_pTrackItems[i];
-               break;
-           }
-        }
-
-        if ( !hoverTrack )
-            return;
-
         //Selected option = Add Clip
         if ( QString::compare(selectedItem->text(), tr("Add Clip")) == 0 )
         {
@@ -455,9 +497,8 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
             RemoveTrackDialog* removeDialog = new RemoveTrackDialog( hoverTrack->pTrackModel->sName, this );
             if ( removeDialog->exec() > 0 )
             {
-                qDebug() << "Removing track" << hoverTrack->pTrackModel->sName;
+                removeTrack( hoverTrack );
             }
-            return;
         }
     }
 }

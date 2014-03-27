@@ -15,22 +15,23 @@ class TrackItem : public QGraphicsObject
 public:
     TrackItem( TrackModel *trackModel );
 
-    QRectF          boundingRect() const;
+    QRectF              boundingRect() const;
 
-    TrackModel*     pTrackModel;
+    TrackModel*         pTrackModel;
+    QGraphicsLineItem*  pBottomLine;
 
 signals:
-    void            mouseDouble( TrackItem* track );
+    void                mouseDouble( TrackItem* track );
 
 public slots:
-    void            updateClips();
+    void                updateClips();
 
 protected:
-    virtual void    paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
-    virtual void    mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
+    virtual void        paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+    virtual void        mouseDoubleClickEvent( QGraphicsSceneMouseEvent * event );
 
 private:
-    QColor          m_clipColor;
+    QColor              m_clipColor;
 };
 
 #endif // TRACKITEM_H

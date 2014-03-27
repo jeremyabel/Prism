@@ -13,6 +13,8 @@ TrackItem::TrackItem( TrackModel *trackModel )
     pTrackModel = trackModel;
     connect( pTrackModel, SIGNAL(clipInserted()), SLOT(updateClips()) );
     prepareGeometryChange();
+
+    setFlag( QGraphicsItem::ItemSendsGeometryChanges );
 }
 
 
