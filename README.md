@@ -11,5 +11,3 @@ Todo
 		- Save / Save As
 		- Import
 		- Export
-	- Track context menu
-		- Remove track
