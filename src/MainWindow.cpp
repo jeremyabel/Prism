@@ -110,6 +110,33 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
 }
 
 
+void MainWindow::addTrack( TrackModel *trackModel )
+{
+    qDebug() << "Adding track" << trackModel->sName;
+
+    int s = m_pTrackItems.size();
+    int iOffset = ( s > 0 ) ? 1 : 0;
+
+    // Add track item
+    TrackItem* item = new TrackItem( trackModel );
+    item->setX( m_pScene->sceneRect().left() + iOffset );
+    item->setY( m_pTimeline->boundingRect().height() + s * ( item->boundingRect().height() + iOffset ) );
+
+    connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
+    m_pScene->addItem( item );
+    m_pTrackItems.append( item );
+
+    // Add clips
+    for ( int j = 0; j < item->pTrackModel->pClips.length(); j++ )
+        addClip( item->pTrackModel->pClips[j], item );
+
+    // Draw horizontal divider
+    float fYPos  = item->pos().y() + item->boundingRect().height();
+    float fWidth = m_pTimeline->boundingRect().width();
+    item->pBottomLine = m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
+}
+
+
 void MainWindow::removeTrack( TrackItem *track )
 {
     qDebug() << "Removing track" << track->pTrackModel->sName;
@@ -403,10 +430,12 @@ void MainWindow::on_actionNew_triggered()
     }
 
     // Remove existing tracks
-    while ( m_pTrackItems.size() < 0 )
-    {
+    while ( m_pTrackItems.size() > 0 )
         removeTrack( m_pTrackItems[0] );
-    }
+
+    // Add one new track
+    TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
+    addTrack( pTrackModel );
 }
 
 
