@@ -2,6 +2,8 @@
 #define TRACKMODEL_H
 
 #include <QObject>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QString>
 #include <QList>
 #include <QColor>
@@ -15,6 +17,8 @@ class TrackModel : public QObject
 public:
     TrackModel();
     TrackModel( QString name, QColor color = QColor( Qt::red ) );
+
+    QJsonObject         serializeToJson();
 
     void                insert( ClipModel* clip );
     void                remove( ClipModel* clip );

@@ -11,6 +11,26 @@ TrackModel::TrackModel( QString name, QColor color )
 }
 
 
+QJsonObject TrackModel::serializeToJson()
+{
+    QJsonObject jsonObject;
+
+    jsonObject["name"]  = sName;
+    //jsonObject["color"] = qColor;
+
+    QJsonArray clipArray;
+    for ( int i = 0; i < pClips.size(); i++ )
+    {
+        ClipModel* clip = pClips[i];
+        clipArray.append(clip->serializeToJson());
+    }
+
+    jsonObject["clips"] = clipArray;
+
+    return jsonObject;
+}
+
+
 void TrackModel::insert( ClipModel *clip )
 {
     // Check for intersections to the left

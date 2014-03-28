@@ -4,10 +4,13 @@
 #include <QDebug>
 #include <QList>
 #include <QRectF>
+#include <QFileDialog>
+
 #include <math.h>
 
 #include "ClipParamDialog.h"
 #include "AddTrackDialog.h"
+#include "FileManager.h"
 #include "RemoveTrackDialog.h"
 #include "RenameTrackDialog.h"
 #include "MainWindow.h"
@@ -371,37 +374,77 @@ int MainWindow::getNearest16th()
 
 void MainWindow::on_actionNew_triggered()
 {
-
+    qDebug() << "action: New...";
 }
 
 
 void MainWindow::on_actionOpen_triggered()
 {
-
+    qDebug() << "action: Open...";
 }
 
 
 void MainWindow::on_actionSave_triggered()
 {
-
+    qDebug() << "action: Save...";
 }
 
 
 void MainWindow::on_actionSave_As_triggered()
 {
+    qDebug() << "action: Save As...";
 
+    // Prep file dialog
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::AnyFile );
+    dialog.setNameFilter( tr( "Timeline File (*.prsm)" ) );
+    dialog.setViewMode( QFileDialog::List );
+    dialog.setAcceptMode( QFileDialog::AcceptSave );
+
+    if ( !dialog.exec() )
+    {
+        qDebug() << "...closed";
+        return;
+    }
+
+    // Put track models into list
+    QList<TrackModel*> trackModels;
+    for ( int i = 0; i < m_pTrackItems.size(); i++ )
+        trackModels.append( m_pTrackItems[i]->pTrackModel );
+
+    if ( FileManager::saveToFile( dialog.selectedFiles().at(0), trackModels ) )
+    {
+        // TODO: Notify in status bar?
+    }
+    else
+    {
+        // TODO: Error
+    }
 }
 
 
 void MainWindow::on_actionImport_triggered()
 {
-
+    qDebug() << "action: Import...";
 }
 
 
 void MainWindow::on_actionExport_triggered()
 {
+    qDebug() << "action: Export...";
 
+    // Prep file dialog
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::AnyFile );
+    dialog.setNameFilter( tr( "XML File (*.xml)" ) );
+    dialog.setViewMode( QFileDialog::List );
+    dialog.setAcceptMode( QFileDialog::AcceptSave );
+
+    if ( !dialog.exec() )
+    {
+        qDebug() << "...closed";
+        return;
+    }
 }
 
 

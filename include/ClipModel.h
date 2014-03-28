@@ -1,6 +1,8 @@
 #ifndef CLIPMODEL_H
 #define CLIPMODEL_H
 
+#include <QJsonObject>
+
 class ClipModel
 {
 public:
@@ -19,6 +21,7 @@ public:
        enableMissingParts   = false;
        enableBatteries      = false;
 
+       category             = "";
        subCategory          = "";
        color                = "";
        year                 = "";
@@ -26,6 +29,25 @@ public:
        broken               = false;
        missingParts         = false;
        batteries            = false;
+    }
+
+    QJsonObject serializeToJson()
+    {
+        QJsonObject jsonObject;
+
+        jsonObject["starting16th"] = starting16th;
+        jsonObject["length16ths"]  = length16th;
+
+        if ( enableCategory )       jsonObject["category"]      = category;
+        if ( enableSubCategory )    jsonObject["subcategory"]   = subCategory;
+        if ( enableColor )          jsonObject["color"]         = color;
+        if ( enableAge )            jsonObject["year"]          = year;
+        if ( enableSize )           jsonObject["size"]          = size;
+        if ( enableBroken )         jsonObject["broken"]        = broken;
+        if ( enableMissingParts )   jsonObject["missingParts"]  = missingParts;
+        if ( enableBatteries )      jsonObject["batteries"]     = batteries;
+
+        return jsonObject;
     }
 
     void setStarting16th( int value, bool force = false )
