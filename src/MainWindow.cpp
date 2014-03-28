@@ -5,6 +5,7 @@
 #include <QList>
 #include <QRectF>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include <math.h>
 
@@ -140,11 +141,14 @@ void MainWindow::removeTrack( TrackItem *track )
     m_pScene->removeItem( track );
 
     // Move other tracks up
-    for ( int i = trackIndex; i < m_pTrackItems.size(); i++ )
+    if ( m_pTrackItems.size() > 0 )
     {
-        TrackItem* trackItem = m_pTrackItems[i];
-        trackItem->setPos( trackItem->pos().x(), trackItem->pos().y() - trackItem->boundingRect().height() - 1 );
-        trackItem->pBottomLine->setPos( trackItem->pBottomLine->pos().x(), trackItem->pBottomLine->pos().y() - trackItem->boundingRect().height() - 1 );
+        for ( int i = trackIndex; i < m_pTrackItems.size(); i++ )
+        {
+            TrackItem* trackItem = m_pTrackItems[i];
+            trackItem->setPos( trackItem->pos().x(), trackItem->pos().y() - trackItem->boundingRect().height() - 1 );
+            trackItem->pBottomLine->setPos( trackItem->pBottomLine->pos().x(), trackItem->pBottomLine->pos().y() - trackItem->boundingRect().height() - 1 );
+        }
     }
 }
 
@@ -375,6 +379,34 @@ int MainWindow::getNearest16th()
 void MainWindow::on_actionNew_triggered()
 {
     qDebug() << "action: New...";
+
+    QMessageBox msgBox;
+    msgBox.setText( "The document has been modified." );
+    msgBox.setInformativeText( "Do you want to save your changes?" );
+    msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
+    msgBox.setDefaultButton( QMessageBox::Save );
+
+    int result = msgBox.exec();
+    switch ( result )
+    {
+        case QMessageBox::Save:
+            qDebug() << "...save";
+            break;
+        case QMessageBox::Discard:
+            qDebug() << "...discard";
+            break;
+        case QMessageBox::Cancel:
+            qDebug() << "...closed";
+            return;
+        default:
+            return;
+    }
+
+    // Remove existing tracks
+    while ( m_pTrackItems.size() < 0 )
+    {
+        removeTrack( m_pTrackItems[0] );
+    }
 }
 
 
@@ -418,7 +450,9 @@ void MainWindow::on_actionSave_As_triggered()
     }
     else
     {
-        // TODO: Error
+        QMessageBox msgBox;
+        msgBox.setText("There was a problem while saving :(");
+        msgBox.exec();
     }
 }
 

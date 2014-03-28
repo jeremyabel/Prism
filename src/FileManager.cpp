@@ -32,3 +32,9 @@ bool FileManager::saveToFile( QString path, QList<TrackModel*> trackModels )
 
     return result != -1;
 }
+
+
+QList<TrackModel*> FileManager::open( QString path )
+{
+
+}

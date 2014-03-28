@@ -48,6 +48,7 @@ private slots:
 
 private:
     void                    addClip( ClipModel* clipModel, TrackItem* trackItem, bool append = false );
+    void                    addTrack( TrackModel* trackModel );
     void                    removeTrack( TrackItem* track );
     int                     getNearest16th();
 
