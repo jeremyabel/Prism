@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_bDialogOpen   = false;
     m_bModified     = false;
     m_sCurrentPath  = "";
+    m_sCategoryPath = "";
 
     ui->setupUi(this);
 
@@ -44,12 +45,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         if ( settings.contains("path") )
         {
-            m_sCurrentPath = settings.value("path").toString();
-            qDebug() << "Current path:" << m_sCurrentPath;
+            m_sCurrentPath  = settings.value("path").toString();
+            qDebug() << " Current path:" << m_sCurrentPath;
 
             // Attempt to load last file
             QList<TrackModel*> loadedTracks;
-            if ( FileManager::open( m_sCurrentPath, &loadedTracks ) )
+            if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData ) )
             {
                 initOpenFailed = false;
 
@@ -496,7 +497,7 @@ void MainWindow::on_actionOpen_triggered()
 
     // Attempt to load from file
     QList<TrackModel*> loadedTracks;
-    if ( FileManager::open( m_sCurrentPath, &loadedTracks ) )
+    if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData ) )
     {
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("path", m_sCurrentPath);
@@ -525,7 +526,7 @@ void MainWindow::on_actionSave_triggered()
             trackModels.append( m_pTrackItems[i]->pTrackModel );
 
         // Write file to current path
-        FileManager::saveToFile( m_sCurrentPath, trackModels );
+        FileManager::saveToFile( m_sCurrentPath, m_sCategoryPath, trackModels );
     }
 }
 
@@ -553,7 +554,7 @@ void MainWindow::on_actionSave_As_triggered()
         trackModels.append( m_pTrackItems[i]->pTrackModel );
 
     QString path = dialog.selectedFiles().at(0);
-    if ( FileManager::saveToFile( path, trackModels ) )
+    if ( FileManager::saveToFile( path, m_sCategoryPath, trackModels ) )
     {
         m_sCurrentPath = path;
         qDebug() << "Current path:" << m_sCurrentPath;
@@ -575,6 +576,31 @@ void MainWindow::on_actionSave_As_triggered()
 void MainWindow::on_actionImport_triggered()
 {
     qDebug() << "action: Import...";
+
+    // Prep file dialog
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::ExistingFile );
+    dialog.setNameFilter( tr("Metadata File (*.meta)") );
+    dialog.setViewMode( QFileDialog::List );
+
+    // Show dialog
+    if ( !dialog.exec() )
+        return;
+
+    m_sCategoryPath = dialog.selectedFiles().at(0);
+    if ( FileManager::import( m_sCategoryPath, m_pCategoryData ) )
+    {
+        QSettings settings("jeremyabel.com", "Prism");
+        settings.setValue("categoryPath", m_sCategoryPath);
+
+        // TODO: Notify in status bar?
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setText("There was a problem importing this file :(");
+        msgBox.exec();
+    }
 }
 
 

@@ -6,7 +6,7 @@
 
 #include "FileManager.h"
 
-bool FileManager::saveToFile( QString path, QList<TrackModel*> trackModels )
+bool FileManager::saveToFile( QString path, QString categoryPath, QList<TrackModel*> trackModels )
 {
     QJsonObject jsonObject;
     QJsonArray  trackArray;
@@ -15,6 +15,7 @@ bool FileManager::saveToFile( QString path, QList<TrackModel*> trackModels )
         trackArray.append( trackModels[i]->serializeToJson() );
 
     // Put into json document
+    jsonObject["categoryPath"] = categoryPath;
     jsonObject["tracks"] = trackArray;
     QJsonDocument jsonDoc = QJsonDocument( jsonObject );
 
@@ -34,7 +35,7 @@ bool FileManager::saveToFile( QString path, QList<TrackModel*> trackModels )
 }
 
 
-bool FileManager::open( QString path, QList<TrackModel*>* const trackModels )
+bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, CategoryData* const categoryData )
 {
     trackModels->clear();
 
@@ -49,7 +50,7 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels )
     QJsonDocument jsonDoc    = QJsonDocument::fromJson( jsonFromFile.toUtf8() );
     QJsonObject   jsonObject = jsonDoc.object();
 
-    // Parse categories
+    // Parse track data
     QJsonArray tracksArray = jsonObject.value("tracks").toArray();
     for ( int i = 0; i < tracksArray.size(); i++ )
     {
@@ -58,5 +59,34 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels )
         trackModels->append( trackModel );
     }
 
+    // Parse category data
+    if ( jsonObject.contains("categoryPath") )
+    {
+        QString categoryPath = jsonObject.value("categoryPath").toString("");
+        FileManager::import( categoryPath, categoryData );
+        qDebug() << "Loaded category data from" << categoryPath;
+    }
+    else
+        qDebug() << "No category data found...";
+
     return trackModels->size() > 0;
+}
+
+
+bool FileManager::import( QString path, CategoryData* categoryData )
+{
+    QString jsonFromFile;
+    QFile file;
+    file.setFileName( path );
+    file.open( QIODevice::ReadOnly | QIODevice::Text );
+    jsonFromFile = file.readAll();
+    file.close();
+
+    // Get jsonObject out of jsonDoc
+    QJsonDocument jsonDoc    = QJsonDocument::fromJson( jsonFromFile.toUtf8() );
+    QJsonObject   jsonObject = jsonDoc.object();
+
+    categoryData = new CategoryData( jsonObject );
+    categoryData->path = path;
+    return true;
 }

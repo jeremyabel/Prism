@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include <QList>
 
+#include "CategoryData.h"
 #include "ClipModel.h"
 #include "ClipItem.h"
 #include "TrackItem.h"
@@ -61,12 +62,14 @@ private:
     ClipItem*               m_pDraggingClip;
     TrackItem*              m_pOriginalTrack;
     TrackItem*              m_pHoverTrack;
+    CategoryData*           m_pCategoryData;
 
+    QString                 m_sCurrentPath;
+    QString                 m_sCategoryPath;
     float                   m_fSpacing;
     int                     m_iDivisions;
     int                     m_iInvDivisions;
     int                     m_iMeasures;
-    QString                 m_sCurrentPath;
     bool                    m_bDialogOpen;
     bool                    m_bModified;
 };
