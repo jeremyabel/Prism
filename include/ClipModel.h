@@ -31,6 +31,11 @@ public:
        batteries            = false;
     }
 
+    ClipModel( QJsonObject jsonObject )
+    {
+
+    }
+
     QJsonObject serializeToJson()
     {
         QJsonObject jsonObject;

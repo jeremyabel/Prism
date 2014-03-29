@@ -10,6 +10,11 @@ TrackModel::TrackModel( QString name, QColor color )
     qColor = color;
 }
 
+TrackModel::TrackModel( QJsonObject json )
+{
+
+}
+
 
 QJsonObject TrackModel::serializeToJson()
 {

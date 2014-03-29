@@ -6,6 +6,7 @@
 #include <QRectF>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QSettings>
 
 #include <math.h>
 
@@ -34,6 +35,36 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_pTimeline = new TimelineItem();
     m_pScene->addItem( m_pTimeline );
+
+    // Get settings
+    bool initOpenFailed = true;
+    QSettings settings("jeremyabel.com", "Prism");
+    if ( settings.status() == QSettings::NoError )
+    {
+        if ( settings.contains("path") )
+        {
+            m_sCurrentPath = settings.value("path").toString();
+
+            QList<TrackModel*> loadedTracks;
+            if ( FileManager::open( m_sCurrentPath, &loadedTracks ) )
+            {
+                initOpenFailed = false;
+
+                for ( int i = 0; i < loadedTracks.size(); i++ )
+                {
+
+                }
+            }
+
+            qDebug() << "Current path:" << m_sCurrentPath;
+        }
+    }
+
+    // Start with new document if we can't open the old one
+    if ( initOpenFailed )
+    {
+
+    }
 
     // Make track data
     TrackModel* pTrackModelA = new TrackModel( "track 1" );
@@ -417,8 +448,10 @@ void MainWindow::on_actionNew_triggered()
     switch ( result )
     {
         case QMessageBox::Save:
+        {
             qDebug() << "...save";
             break;
+        }
         case QMessageBox::Discard:
             qDebug() << "...discard";
             break;
@@ -436,6 +469,12 @@ void MainWindow::on_actionNew_triggered()
     // Add one new track
     TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
     addTrack( pTrackModel );
+
+    // Reset path
+    m_sCurrentPath = "";
+
+    QSettings settings("jeremyabel.com", "Prism");
+    settings.setValue("path", "");
 }
 
 
@@ -448,6 +487,20 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionSave_triggered()
 {
     qDebug() << "action: Save...";
+
+    // Just run Save As if we've never saved before
+    if ( m_sCurrentPath.length() <= 0 )
+        on_actionSave_As_triggered();
+    else
+    {
+        // Put track models into list
+        QList<TrackModel*> trackModels;
+        for ( int i = 0; i < m_pTrackItems.size(); i++ )
+            trackModels.append( m_pTrackItems[i]->pTrackModel );
+
+        // Write file to current path
+        FileManager::saveToFile( m_sCurrentPath, trackModels );
+    }
 }
 
 
@@ -473,8 +526,15 @@ void MainWindow::on_actionSave_As_triggered()
     for ( int i = 0; i < m_pTrackItems.size(); i++ )
         trackModels.append( m_pTrackItems[i]->pTrackModel );
 
-    if ( FileManager::saveToFile( dialog.selectedFiles().at(0), trackModels ) )
+    QString path = dialog.selectedFiles().at(0);
+    if ( FileManager::saveToFile( path, trackModels ) )
     {
+        m_sCurrentPath = path;
+        qDebug() << "Current path:" << m_sCurrentPath;
+
+        QSettings settings("jeremyabel.com", "Prism");
+        settings.setValue("path", m_sCurrentPath);
+
         // TODO: Notify in status bar?
     }
     else

@@ -7,8 +7,8 @@
 class FileManager
 {
 public:
-    static bool                 saveToFile( QString path, QList<TrackModel*> trackModels );
-    static QList<TrackModel*>   open( QString path );
+    static bool     saveToFile( QString path, QList<TrackModel*> trackModels );
+    static bool     open( QString path, QList<TrackModel*>* const trackModels );
 
 private:
     FileManager();

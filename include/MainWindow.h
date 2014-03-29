@@ -22,10 +22,9 @@ class MainWindow : public QMainWindow
 
 public:
     explicit                MainWindow( QWidget *parent = 0 );
+    ~MainWindow();
 
     void                    keyPressEvent( QKeyEvent *event );
-
-    ~MainWindow();
 
 private slots:
     void                    on_timeZoomSlider_valueChanged( int value );
@@ -66,6 +65,7 @@ private:
     int                     m_iDivisions;
     int                     m_iInvDivisions;
     int                     m_iMeasures;
+    QString                 m_sCurrentPath;
     bool                    m_bDialogOpen;
     bool                    m_bModified;
 };
