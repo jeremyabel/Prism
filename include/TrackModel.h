@@ -17,7 +17,7 @@ class TrackModel : public QObject
 public:
     TrackModel();
     TrackModel( QString name, QColor color = QColor( Qt::red ) );
-    TrackModel( QJsonObject json );
+    TrackModel( QJsonObject jsonObject );
 
     QJsonObject         serializeToJson();
 

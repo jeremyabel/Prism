@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_iMeasures     = 100;
     m_bDialogOpen   = false;
     m_bModified     = false;
+    m_sCurrentPath  = "";
 
     ui->setupUi(this);
 
@@ -44,69 +45,35 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         if ( settings.contains("path") )
         {
             m_sCurrentPath = settings.value("path").toString();
+            qDebug() << "Current path:" << m_sCurrentPath;
 
+            // Attempt to load last file
             QList<TrackModel*> loadedTracks;
             if ( FileManager::open( m_sCurrentPath, &loadedTracks ) )
             {
                 initOpenFailed = false;
 
+                // Add track items
                 for ( int i = 0; i < loadedTracks.size(); i++ )
-                {
+                    addTrack( loadedTracks[i] );
 
-                }
+                m_bModified = false;
             }
-
-            qDebug() << "Current path:" << m_sCurrentPath;
+            else
+            {
+                // Reset saved path if we have a problem opening this one
+                qDebug() << "Previous file could not be opened... resetting.";
+                settings.setValue("path", "");
+            }
         }
     }
 
     // Start with new document if we can't open the old one
     if ( initOpenFailed )
     {
-
-    }
-
-    // Make track data
-    TrackModel* pTrackModelA = new TrackModel( "track 1" );
-    TrackModel* pTrackModelB = new TrackModel( "track 2", QColor( Qt::green ) );
-    TrackModel* pTrackModelC = new TrackModel( "track 3", QColor( Qt::blue ) );
-
-    // Make clip data
-    ClipModel*  pClipModelA  = new ClipModel( 10, 30 );
-    ClipModel*  pClipModelB  = new ClipModel( 15, 18 );
-    ClipModel*  pClipModelC  = new ClipModel(  8,  7 );
-    pTrackModelA->pClips.append( pClipModelA );
-    pTrackModelB->pClips.append( pClipModelB );
-    pTrackModelB->pClips.append( pClipModelC );
-
-    // Make track displays
-    m_pTrackItems.append( new TrackItem( pTrackModelA ) );
-    m_pTrackItems.append( new TrackItem( pTrackModelB ) );
-    m_pTrackItems.append( new TrackItem( pTrackModelC ) );
-
-    for ( int i = 0; i < m_pTrackItems.length(); i++ )
-    {
-        int iOffset = ( i > 0 ) ? 1 : 0;
-
-        // Add track item
-        TrackItem* item = m_pTrackItems[i];
-        item->setX( m_pScene->sceneRect().left() + iOffset );
-        item->setY( m_pTimeline->boundingRect().height() + i * ( item->boundingRect().height() + iOffset ) );
-        connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
-
-        // Draw horizontal divider
-        float fYPos  = item->pos().y() + item->boundingRect().height();
-        float fWidth = m_pTimeline->boundingRect().width();
-
-        m_pScene->addItem( item );
-
-        // Add clips
-        for ( int j = 0; j < item->pTrackModel->pClips.length(); j++ )
-        {
-            addClip( item->pTrackModel->pClips[j], item );
-        }
-
-        item->pBottomLine = m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
+        // Add one new track
+        TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
+        addTrack( pTrackModel );
     }
 
     on_timeZoomSlider_valueChanged( 500 );
@@ -121,6 +88,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool append )
 {
+    m_bModified = true;
+    qDebug() << "Adding clip item to track" << trackItem->pTrackModel->sName;
+
     ClipItem* clipItem = new ClipItem( clipModel );
     connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased() ) );
@@ -143,6 +113,7 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
 
 void MainWindow::addTrack( TrackModel *trackModel )
 {
+    m_bModified = true;
     qDebug() << "Adding track" << trackModel->sName;
 
     int s = m_pTrackItems.size();
@@ -170,6 +141,7 @@ void MainWindow::addTrack( TrackModel *trackModel )
 
 void MainWindow::removeTrack( TrackItem *track )
 {
+    m_bModified = true;
     qDebug() << "Removing track" << track->pTrackModel->sName;
 
     // Remove and clean up child clips
@@ -284,6 +256,8 @@ void MainWindow::on_timelineClipDetached()
 
 void MainWindow::on_timelineClipReleased()
 {
+    m_bModified = true;
+
     TrackItem* targetTrackItem = (TrackItem*)m_pDraggingClip->parentObject();
 
     if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
@@ -322,6 +296,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
 
     qDebug() << "Opening clip dialog...";
 
+    m_bModified   = true;
     m_bDialogOpen = true;
 
     ClipModel origClip = *clip->pClipModel;
@@ -331,6 +306,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
     {
         // Restore
         qDebug() << "Restoring";
+        m_bModified = false;
         *clip->pClipModel = origClip;
     }
 
@@ -341,6 +317,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
 
 void MainWindow::on_timelineClipMoved()
 {
+    m_bModified   = true;
     m_pHoverTrack = NULL;
     QPoint cursor = ui->graphicsView->mapFromGlobal( QCursor::pos() );
 
@@ -376,6 +353,7 @@ void MainWindow::on_trackDoubleClicked( TrackItem *track )
     qDebug() << "Opening renaming dialog...";
 
     m_bDialogOpen = true;
+    m_bModified   = true;
 
     QString origTrackName = track->pTrackModel->sName;
     RenameTrackDialog* pRenameDialog = new RenameTrackDialog( track->pTrackModel, this );
@@ -384,6 +362,7 @@ void MainWindow::on_trackDoubleClicked( TrackItem *track )
     {
         // Restore
         qDebug() << "Restoring";
+        m_bModified = false;
         track->pTrackModel->sName = origTrackName;
     }
 
@@ -399,6 +378,7 @@ void MainWindow::keyPressEvent( QKeyEvent *event )
     {
         if ( event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace )
         {
+            m_bModified = true;
             qDebug() << "Deleting clip(s)";
 
             while ( m_pScene->selectedItems().size() > 0 )
@@ -434,33 +414,45 @@ int MainWindow::getNearest16th()
 // Menu Actions
 //------------------------------------------------------------------------------------------------------
 
+bool MainWindow::releaseModifiedFile()
+{
+    // Allow user to save current file if it has been modified since the last save
+    if ( m_bModified )
+    {
+        QMessageBox msgBox;
+        msgBox.setText( "The document has been modified." );
+        msgBox.setInformativeText( "Do you want to save your changes?" );
+        msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
+        msgBox.setDefaultButton( QMessageBox::Save );
+
+        int result = msgBox.exec();
+        switch ( result )
+        {
+            case QMessageBox::Save:
+                qDebug() << "...save";
+                // TODO: IMPLEMENT
+                break;
+            case QMessageBox::Discard:
+                qDebug() << "...discard";
+                break;
+            case QMessageBox::Cancel:
+                qDebug() << "...closed";
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    return true;
+}
+
 void MainWindow::on_actionNew_triggered()
 {
     qDebug() << "action: New...";
 
-    QMessageBox msgBox;
-    msgBox.setText( "The document has been modified." );
-    msgBox.setInformativeText( "Do you want to save your changes?" );
-    msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
-    msgBox.setDefaultButton( QMessageBox::Save );
-
-    int result = msgBox.exec();
-    switch ( result )
-    {
-        case QMessageBox::Save:
-        {
-            qDebug() << "...save";
-            break;
-        }
-        case QMessageBox::Discard:
-            qDebug() << "...discard";
-            break;
-        case QMessageBox::Cancel:
-            qDebug() << "...closed";
-            return;
-        default:
-            return;
-    }
+    // Deal with modified file
+    if ( !releaseModifiedFile() )
+        return;
 
     // Remove existing tracks
     while ( m_pTrackItems.size() > 0 )
@@ -481,6 +473,40 @@ void MainWindow::on_actionNew_triggered()
 void MainWindow::on_actionOpen_triggered()
 {
     qDebug() << "action: Open...";
+
+    // Deal with modified file
+    if ( !releaseModifiedFile() )
+        return;
+
+    // Prep file dialog
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::ExistingFile );
+    dialog.setNameFilter( tr("Timeline File (*.prsm)") );
+    dialog.setViewMode( QFileDialog::List );
+
+    // Show dialog
+    if ( !dialog.exec() )
+        return;
+
+    m_sCurrentPath = dialog.selectedFiles().at(0);
+
+    // Remove existing tracks
+    while ( m_pTrackItems.size() > 0 )
+        removeTrack( m_pTrackItems[0] );
+
+    // Attempt to load from file
+    QList<TrackModel*> loadedTracks;
+    if ( FileManager::open( m_sCurrentPath, &loadedTracks ) )
+    {
+        QSettings settings("jeremyabel.com", "Prism");
+        settings.setValue("path", m_sCurrentPath);
+
+        // Add track items
+        for ( int i = 0; i < loadedTracks.size(); i++ )
+            addTrack( loadedTracks[i] );
+
+        m_bModified = false;
+    }
 }
 
 

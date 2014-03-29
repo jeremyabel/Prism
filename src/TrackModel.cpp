@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QList>
+
 #include <limits>
 
 #include "TrackModel.h"
@@ -10,18 +11,35 @@ TrackModel::TrackModel( QString name, QColor color )
     qColor = color;
 }
 
-TrackModel::TrackModel( QJsonObject json )
+TrackModel::TrackModel( QJsonObject jsonObject )
 {
+    sName  = jsonObject.value("name").toString();
 
+    QJsonObject colorObject = jsonObject.value("color").toObject();
+    qColor.setRed(   colorObject.value("r").toInt() );
+    qColor.setGreen( colorObject.value("g").toInt() );
+    qColor.setBlue(  colorObject.value("b").toInt() );
+
+    QJsonArray clipsArray = jsonObject.value("clips").toArray();
+    for ( int i = 0; i < clipsArray.count(); i++ )
+    {
+        QJsonObject clipObject = clipsArray.at(i).toObject();
+        ClipModel*  pClipModel = new ClipModel(clipObject);
+        insert(pClipModel);
+    }
 }
 
 
 QJsonObject TrackModel::serializeToJson()
 {
     QJsonObject jsonObject;
+    QJsonObject jsonColor;
 
     jsonObject["name"]  = sName;
-    //jsonObject["color"] = qColor;
+    jsonColor["r"]      = qColor.red();
+    jsonColor["g"]      = qColor.green();
+    jsonColor["b"]      = qColor.blue();
+    jsonObject["color"] = jsonColor;
 
     QJsonArray clipArray;
     for ( int i = 0; i < pClips.size(); i++ )

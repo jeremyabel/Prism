@@ -33,7 +33,27 @@ public:
 
     ClipModel( QJsonObject jsonObject )
     {
+        starting16th        = jsonObject.value("starting16th").toInt(0);
+        length16th          = jsonObject.value("length16ths").toInt(4);
+        ending16th          = starting16th + length16th;
 
+        enableCategory      = jsonObject.contains("category");
+        enableSubCategory   = jsonObject.contains("subcategory");
+        enableColor         = jsonObject.contains("color");
+        enableAge           = jsonObject.contains("year");
+        enableSize          = jsonObject.contains("size");
+        enableBroken        = jsonObject.contains("broken");
+        enableMissingParts  = jsonObject.contains("missingParts");
+        enableBatteries     = jsonObject.contains("batteries");
+
+        category            = jsonObject.value("category").toString("");
+        subCategory         = jsonObject.value("subcategory").toString("");
+        color               = jsonObject.value("color").toString("");
+        year                = jsonObject.value("year").toString("");
+        size                = jsonObject.value("size").toInt(1);
+        broken              = jsonObject.value("broken").toBool();
+        missingParts        = jsonObject.value("missingParts").toBool();
+        batteries           = jsonObject.value("batteries").toBool();
     }
 
     QJsonObject serializeToJson()

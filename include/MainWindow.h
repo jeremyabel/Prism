@@ -46,6 +46,7 @@ private slots:
     void                    on_graphicsView_customContextMenuRequested( const QPoint &pos );
 
 private:
+    bool                    releaseModifiedFile();
     void                    addClip( ClipModel* clipModel, TrackItem* trackItem, bool append = false );
     void                    addTrack( TrackModel* trackModel );
     void                    removeTrack( TrackItem* track );
