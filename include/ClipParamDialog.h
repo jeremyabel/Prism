@@ -2,6 +2,8 @@
 #define CLIPDIALOG_H
 
 #include <QDialog>
+#include <QButtonGroup>
+#include <QAbstractButton>
 
 #include "CategoryData.h"
 #include "ClipModel.h"
@@ -23,9 +25,13 @@ public:
 private:
     Ui::ClipParamDialog* ui;
 
+    bool                okOnLeft;
     ClipModel*          editingClip;
     const CategoryData* m_pCategoryData;
-    bool                okOnLeft;
+
+    QButtonGroup*       m_pBrokenGroup;
+    QButtonGroup*       m_pMissingGroup;
+    QButtonGroup*       m_pBatteriesGroup;
 
 signals:
 
@@ -42,6 +48,16 @@ private slots:
     void on_batCheckBox_stateChanged(           int value );
     void on_buttonRight_clicked();
     void on_buttonLeft_clicked();
+
+    void on_catComboBox_currentIndexChanged(    int  index );
+    void on_subcatComboBox_currentIndexChanged( int  index );
+    void on_colorComboBox_currentIndexChanged(  int  index );
+    void on_sizeHorizontalSlider_valueChanged(  int  value );
+    void on_ageComboBox_currentIndexChanged(    int  index );
+    void on_brokenGroup_clicked(                QAbstractButton* button );
+    void on_missingGroup_clicked(               QAbstractButton* button );
+    void on_batteriesGroup_clicked(             QAbstractButton* button );
+
 };
 
 #endif // CLIPDIALOG_H
