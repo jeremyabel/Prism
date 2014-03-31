@@ -1,12 +1,13 @@
 #include <QDebug>
 #include "ClipParamDialog.h"
 
-ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog)
+ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryData, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog)
 {
     ui->setupUi(this);
 
-    editingClip  = &clip;
-    okOnLeft     = false;
+    editingClip     = &clip;
+    m_pCategoryData = categoryData;
+    okOnLeft        = false;
 
 #ifdef Q_WS_WIN
     // Swap buttons for Windows, as is customary
@@ -19,6 +20,7 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(p
     ui->catCheckBox->setChecked(            editingClip->enableCategory );
     ui->catComboBox->setEnabled(            editingClip->enableCategory );
 
+    ui->subcatCheckBox->setEnabled(         editingClip->enableCategory );
     ui->subcatCheckBox->setChecked(         editingClip->enableSubCategory );
     ui->subcatComboBox->setEnabled(         editingClip->enableSubCategory );
 
@@ -43,15 +45,24 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(p
     ui->batRadioButtonYes->setEnabled(      editingClip->enableBatteries );
     ui->batRadioButtonNo->setEnabled(       editingClip->enableBatteries );
 
+    // Add category data
+    if ( m_pCategoryData )
+    {
+        for ( int i = 0; i < m_pCategoryData->categoryList->size(); i++ )
+            ui->catComboBox->addItem( m_pCategoryData->categoryList->at(i)->name );
+
+        ui->catComboBox->setCurrentIndex(0);
+    }
 
     if ( editingClip->enableCategory )
     {
+        int catIndex = m_pCategoryData->getCategoryByName(editingClip->category)->index;
+        ui->catComboBox->setCurrentIndex( catIndex );
 
-    }
+        if ( editingClip->enableSubCategory )
+        {
 
-    if ( editingClip->enableSubCategory )
-    {
-
+        }
     }
 
     if ( editingClip->enableColor )
@@ -61,7 +72,7 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, QWidget *parent ) : QDialog(p
 
     if ( editingClip->enableSize )
     {
-
+        ui->sizeHorizontalSlider->setValue( editingClip->size );
     }
 
     if ( editingClip->enableAge )
@@ -101,6 +112,7 @@ void ClipParamDialog::on_catCheckBox_stateChanged( int value )
     editingClip->enableCategory = value > 0;
     editingClip->category = ui->catComboBox->currentText();
 
+    ui->subcatCheckBox->setEnabled( editingClip->enableCategory );
     ui->catComboBox->setEnabled( editingClip->enableCategory );
 }
 

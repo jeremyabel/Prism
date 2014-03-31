@@ -65,6 +65,7 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, Cat
         QString categoryPath = jsonObject.value("categoryPath").toString("");
         FileManager::import( categoryPath, categoryData );
         qDebug() << "Loaded category data from" << categoryPath;
+        qDebug() << categoryData->categoryList->size();
     }
     else
         qDebug() << "No category data found...";
@@ -86,7 +87,7 @@ bool FileManager::import( QString path, CategoryData* categoryData )
     QJsonDocument jsonDoc    = QJsonDocument::fromJson( jsonFromFile.toUtf8() );
     QJsonObject   jsonObject = jsonDoc.object();
 
-    categoryData = new CategoryData( jsonObject );
+    categoryData->initWithJson( jsonObject );
     categoryData->path = path;
     return true;
 }

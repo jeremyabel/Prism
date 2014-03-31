@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     {
         if ( settings.contains("path") )
         {
+            m_pCategoryData = new CategoryData();
             m_sCurrentPath  = settings.value("path").toString();
             qDebug() << " Current path:" << m_sCurrentPath;
 
@@ -301,18 +302,18 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
     m_bDialogOpen = true;
 
     ClipModel origClip = *clip->pClipModel;
-    ClipParamDialog* pClipDialog = new ClipParamDialog( *clip->pClipModel, this );
+    ClipParamDialog* pClipDialog = new ClipParamDialog( *clip->pClipModel, m_pCategoryData, this );
 
     if ( pClipDialog->exec() == 0 )
     {
         // Restore
-        qDebug() << "Restoring";
+        qDebug() << "Restoring...";
         m_bModified = false;
         *clip->pClipModel = origClip;
     }
 
     m_bDialogOpen = false;
-    qDebug() << "Dialog closed";
+    qDebug() << "...closed";
 }
 
 
@@ -587,6 +588,7 @@ void MainWindow::on_actionImport_triggered()
     if ( !dialog.exec() )
         return;
 
+    m_pCategoryData = new CategoryData();
     m_sCategoryPath = dialog.selectedFiles().at(0);
     if ( FileManager::import( m_sCategoryPath, m_pCategoryData ) )
     {

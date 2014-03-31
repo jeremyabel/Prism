@@ -11,15 +11,19 @@ public:
     CategoryModel() { subcategories = new QList<QVariant>(); }
 
     QString name;
+    int     index;
     QList<QVariant> *subcategories;
 };
 
 class CategoryData
 {
 public:
-    CategoryData( QJsonObject jsonObject );
+    CategoryData();
+    void initWithJson( QJsonObject jsonObject );
 
-    QList<CategoryModel*> categoryList;
+    const CategoryModel* getCategoryByName( const QString name ) const;
+
+    QList<CategoryModel*>* categoryList;
     QString path;
 };
 
