@@ -23,7 +23,8 @@ SOURCES += src/main.cpp\
     src/RemoveTrackDialog.cpp \
     src/RenameTrackDialog.cpp \
     src/FileManager.cpp \
-    src/CategoryData.cpp
+    src/CategoryData.cpp \
+    src/ExportDialog.cpp
 
 HEADERS  += include/ClipItem.h \
     include/TrackItem.h \
@@ -36,10 +37,12 @@ HEADERS  += include/ClipItem.h \
     include/RemoveTrackDialog.h \
     include/RenameTrackDialog.h \
     include/FileManager.h \
-    include/CategoryData.h
+    include/CategoryData.h \
+    include/ExportDialog.h
 
 FORMS    += forms/MainWindow.ui \
     forms/ClipParamDialog.ui \
     forms/AddTrackDialog.ui \
     forms/RemoveTrackDialog.ui \
-    forms/RenameTrackDialog.ui
+    forms/RenameTrackDialog.ui \
+    forms/ExportDialog.ui
