@@ -8,6 +8,7 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
     editingClip     = &clip;
     m_pCategoryData = categoryData;
     okOnLeft        = false;
+    m_bInitializing = true;
 
 #ifdef Q_WS_WIN
     // Swap buttons for Windows, as is customary
@@ -64,30 +65,40 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
     m_pBatteriesGroup->setExclusive(true);
     connect( m_pBatteriesGroup, SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( on_batteriesGroup_clicked(QAbstractButton*) ) );
 
-    // Add category data
     if ( m_pCategoryData )
     {
+        int index = 0;
+
+        // Add category data
         for ( int i = 0; i < m_pCategoryData->categoryList->size(); i++ )
             ui->catComboBox->addItem( m_pCategoryData->categoryList->at(i)->name );
 
-        ui->catComboBox->setCurrentIndex(0);
-    }
+        // Find category
+        if ( editingClip->enableCategory )
+            index = m_pCategoryData->getCategoryByName( editingClip->category )->index;
 
-    if ( editingClip->enableCategory )
-    {
-        int catIndex = m_pCategoryData->getCategoryByName(editingClip->category)->index;
-        ui->catComboBox->setCurrentIndex( catIndex );
+        // Assign category
+        ui->catComboBox->setCurrentIndex(index);
 
+        // Populate with subcategories
+        for ( int i = 0; i < m_pCategoryData->categoryList->at(index)->subcategories->size(); i++ )
+        {
+            QString subcat = m_pCategoryData->categoryList->at(index)->subcategories->at(i).toString();
+            ui->subcatComboBox->addItem( subcat );
+        }
+
+        // Assign subcategory
         if ( editingClip->enableSubCategory )
         {
-
+            int subIndex = m_pCategoryData->categoryList->at(index)->subcategories->indexOf( editingClip->subCategory );
+            ui->subcatComboBox->setCurrentIndex(subIndex);
         }
     }
 
     if ( editingClip->enableColor )
     {
 
-    }        
+    }
 
     if ( editingClip->enableSize )
     {
@@ -116,6 +127,8 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
         ui->batRadioButtonYes->setChecked( editingClip->batteries );
         ui->batRadioButtonNo->setChecked( !editingClip->batteries );
     }
+
+    m_bInitializing = false;
 }
 
 
@@ -130,7 +143,9 @@ void ClipParamDialog::on_catCheckBox_stateChanged( int value )
     qDebug() << "Category toggle state:" << value;
 
     editingClip->enableCategory = value > 0;
-    editingClip->category = ui->catComboBox->currentText();
+
+    if ( !m_bInitializing )
+        editingClip->category = ui->catComboBox->currentText();
 
     ui->subcatCheckBox->setEnabled( editingClip->enableCategory );
     ui->catComboBox->setEnabled( editingClip->enableCategory );
@@ -141,7 +156,9 @@ void ClipParamDialog::on_subcatCheckBox_stateChanged( int value )
     qDebug() << "Subcategory toggle state:" << value;
 
     editingClip->enableSubCategory = value > 0;
-    editingClip->subCategory = ui->subcatComboBox->currentText();
+
+    if ( !m_bInitializing )
+        editingClip->subCategory = ui->subcatComboBox->currentText();
 
     ui->subcatComboBox->setEnabled( editingClip->enableSubCategory );
 }
@@ -151,7 +168,9 @@ void ClipParamDialog::on_colorCheckBox_stateChanged( int value )
     qDebug() << "Color toggle state:" << value;
 
     editingClip->enableColor = value > 0;
-    editingClip->color = ui->colorComboBox->currentText();
+
+    if ( !m_bInitializing )
+        editingClip->color = ui->colorComboBox->currentText();
 
     ui->colorComboBox->setEnabled( editingClip->enableColor );
 }
@@ -161,7 +180,9 @@ void ClipParamDialog::on_sizeCheckBox_stateChanged( int value )
     qDebug() << "Size toggle state:" << value;
 
     editingClip->enableSize = value > 0;
-    editingClip->size = value;
+
+    if ( !m_bInitializing )
+        editingClip->size = value;
 
     ui->sizeHorizontalSlider->setEnabled( editingClip->enableSize );
 }
@@ -171,7 +192,9 @@ void ClipParamDialog::on_ageCheckBox_stateChanged( int value )
     qDebug() << "Age toggle state:" << value;
 
     editingClip->enableAge = value > 0;
-    editingClip->year = ui->ageComboBox->currentText();
+
+    if ( !m_bInitializing )
+        editingClip->year = ui->ageComboBox->currentText();
 
     ui->ageComboBox->setEnabled( editingClip->enableAge );
 }
@@ -181,7 +204,9 @@ void ClipParamDialog::on_brokenCheckBox_stateChanged( int value )
     qDebug() << "Broken toggle state:" << value;
 
     editingClip->enableBroken = value > 0;
-    editingClip->broken = ui->brokenRadioButtonYes->isChecked();
+
+    if ( !m_bInitializing )
+        editingClip->broken = ui->brokenRadioButtonYes->isChecked();
 
     ui->brokenRadioButtonYes->setEnabled( editingClip->enableBroken );
     ui->brokenRadioButtonNo->setEnabled(  editingClip->enableBroken );
@@ -192,7 +217,9 @@ void ClipParamDialog::on_missingCheckBox_stateChanged( int value )
     qDebug() << "Missing toggle state:" << value;
 
     editingClip->enableMissingParts = value > 0;
-    editingClip->missingParts = ui->missingRadioButtonYes->isChecked();
+
+    if ( !m_bInitializing )
+        editingClip->missingParts = ui->missingRadioButtonYes->isChecked();
 
     ui->missingRadioButtonYes->setEnabled( editingClip->enableMissingParts );
     ui->missingRadioButtonNo->setEnabled(  editingClip->enableMissingParts );
@@ -203,7 +230,9 @@ void ClipParamDialog::on_batCheckBox_stateChanged( int value )
     qDebug() << "Battery toggle state:" << value;
 
     editingClip->enableBatteries = value > 0;
-    editingClip->batteries = ui->batRadioButtonYes->isChecked();
+
+    if ( !m_bInitializing )
+        editingClip->batteries = ui->batRadioButtonYes->isChecked();
 
     ui->batRadioButtonYes->setEnabled( editingClip->enableBatteries );
     ui->batRadioButtonNo->setEnabled(  editingClip->enableBatteries );
@@ -232,14 +261,29 @@ void ClipParamDialog::on_buttonLeft_clicked()
 
 void ClipParamDialog::on_catComboBox_currentIndexChanged( int index )
 {
+    if ( m_bInitializing )
+        return;
+
     QString result = ui->catComboBox->itemText(index);
     qDebug() << "Category changed:" << result;
 
     editingClip->category = result;
+    qDebug() << editingClip->category;
+
+    // Populate with subcategories
+    ui->subcatComboBox->clear();
+    for ( int i = 0; i < m_pCategoryData->categoryList->at(index)->subcategories->size(); i++ )
+    {
+        QString subcat = m_pCategoryData->categoryList->at(index)->subcategories->at(i).toString();
+        ui->subcatComboBox->addItem( subcat );
+    }
 }
 
 void ClipParamDialog::on_subcatComboBox_currentIndexChanged( int index )
 {
+    if ( m_bInitializing )
+        return;
+
     QString result = ui->subcatComboBox->itemText(index);
     qDebug() << "Subcategory changed:" << result;
 
@@ -248,6 +292,9 @@ void ClipParamDialog::on_subcatComboBox_currentIndexChanged( int index )
 
 void ClipParamDialog::on_colorComboBox_currentIndexChanged( int index )
 {
+    if ( m_bInitializing )
+        return;
+
     QString result = ui->colorComboBox->itemText(index);
     qDebug() << "Color changed:" << result;
 
@@ -256,6 +303,9 @@ void ClipParamDialog::on_colorComboBox_currentIndexChanged( int index )
 
 void ClipParamDialog::on_sizeHorizontalSlider_valueChanged( int value )
 {
+    if ( m_bInitializing )
+        return;
+
     qDebug() << "Size changed:" << value;
 
     editingClip->size = value;
@@ -263,6 +313,9 @@ void ClipParamDialog::on_sizeHorizontalSlider_valueChanged( int value )
 
 void ClipParamDialog::on_ageComboBox_currentIndexChanged( int index )
 {
+    if ( m_bInitializing )
+        return;
+
     QString result = ui->ageComboBox->itemText(index);
     qDebug() << "Year changed:" << result;
 
@@ -271,6 +324,9 @@ void ClipParamDialog::on_ageComboBox_currentIndexChanged( int index )
 
 void ClipParamDialog::on_brokenGroup_clicked( QAbstractButton *button )
 {
+    if ( m_bInitializing )
+        return;
+
     bool value = button == ui->brokenRadioButtonYes;
     if ( value != editingClip->broken )
     {
@@ -281,6 +337,9 @@ void ClipParamDialog::on_brokenGroup_clicked( QAbstractButton *button )
 
 void ClipParamDialog::on_missingGroup_clicked( QAbstractButton *button )
 {
+    if ( m_bInitializing )
+        return;
+
     bool value = button == ui->missingRadioButtonYes;
     if ( value != editingClip->missingParts )
     {
@@ -291,6 +350,9 @@ void ClipParamDialog::on_missingGroup_clicked( QAbstractButton *button )
 
 void ClipParamDialog::on_batteriesGroup_clicked( QAbstractButton *button )
 {
+    if ( m_bInitializing )
+        return;
+
     bool value = button == ui->batRadioButtonYes;
     if ( value != editingClip->batteries )
     {
