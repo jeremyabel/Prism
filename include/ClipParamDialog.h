@@ -55,10 +55,9 @@ private slots:
     void on_colorComboBox_currentIndexChanged(  int  index );
     void on_sizeHorizontalSlider_valueChanged(  int  value );
     void on_ageComboBox_currentIndexChanged(    int  index );
-    void on_brokenGroup_clicked(                QAbstractButton* button );
-    void on_missingGroup_clicked(               QAbstractButton* button );
-    void on_batteriesGroup_clicked(             QAbstractButton* button );
-
+    void onBrokenGroup_clicked(                 QAbstractButton* button );
+    void onMissingGroup_clicked(                QAbstractButton* button );
+    void onBatteriesGroup_clicked(              QAbstractButton* button );
 };
 
 #endif // CLIPDIALOG_H

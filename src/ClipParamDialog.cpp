@@ -1,3 +1,4 @@
+#include <QDate>
 #include <QDebug>
 #include "ClipParamDialog.h"
 
@@ -51,19 +52,19 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
     m_pBrokenGroup->addButton( ui->brokenRadioButtonYes );
     m_pBrokenGroup->addButton( ui->brokenRadioButtonNo );
     m_pBrokenGroup->setExclusive(true);
-    connect( m_pBrokenGroup,    SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( on_brokenGroup_clicked(QAbstractButton*) ) );
+    connect( m_pBrokenGroup,    SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( onBrokenGroup_clicked(QAbstractButton*) ) );
 
     m_pMissingGroup = new QButtonGroup();
     m_pMissingGroup->addButton( ui->missingRadioButtonYes );
     m_pMissingGroup->addButton( ui->missingRadioButtonNo );
     m_pMissingGroup->setExclusive(true);
-    connect( m_pMissingGroup,   SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( on_missingGroup_clicked(QAbstractButton*) ) );
+    connect( m_pMissingGroup,   SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( onMissingGroup_clicked(QAbstractButton*) ) );
 
     m_pBatteriesGroup = new QButtonGroup();
     m_pBatteriesGroup->addButton( ui->batRadioButtonYes );
     m_pBatteriesGroup->addButton( ui->batRadioButtonNo );
     m_pBatteriesGroup->setExclusive(true);
-    connect( m_pBatteriesGroup, SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( on_batteriesGroup_clicked(QAbstractButton*) ) );
+    connect( m_pBatteriesGroup, SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( onBatteriesGroup_clicked(QAbstractButton*) ) );
 
     if ( m_pCategoryData )
     {
@@ -82,10 +83,7 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
 
         // Populate with subcategories
         for ( int i = 0; i < m_pCategoryData->categoryList->at(index)->subcategories->size(); i++ )
-        {
-            QString subcat = m_pCategoryData->categoryList->at(index)->subcategories->at(i).toString();
-            ui->subcatComboBox->addItem( subcat );
-        }
+            ui->subcatComboBox->addItem( m_pCategoryData->categoryList->at(index)->subcategories->at(i).toString() );
 
         // Assign subcategory
         if ( editingClip->enableSubCategory )
@@ -97,7 +95,7 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
 
     if ( editingClip->enableColor )
     {
-
+        ui->colorComboBox->setCurrentText( editingClip->color );
     }
 
     if ( editingClip->enableSize )
@@ -105,9 +103,14 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
         ui->sizeHorizontalSlider->setValue( editingClip->size );
     }
 
+    // Add years to combo box
+    const int startingYear = 1960;
+    for ( int i = startingYear; i <= QDate::currentDate().year(); i++ )
+        ui->ageComboBox->addItem(QString::number(i));
+
     if ( editingClip->enableAge )
     {
-
+        ui->ageComboBox->setCurrentText(editingClip->year);
     }
 
     if ( editingClip->enableBroken )
@@ -322,7 +325,7 @@ void ClipParamDialog::on_ageComboBox_currentIndexChanged( int index )
     editingClip->year = result;
 }
 
-void ClipParamDialog::on_brokenGroup_clicked( QAbstractButton *button )
+void ClipParamDialog::onBrokenGroup_clicked(QAbstractButton *button)
 {
     if ( m_bInitializing )
         return;
@@ -335,7 +338,7 @@ void ClipParamDialog::on_brokenGroup_clicked( QAbstractButton *button )
     }
 }
 
-void ClipParamDialog::on_missingGroup_clicked( QAbstractButton *button )
+void ClipParamDialog::onMissingGroup_clicked( QAbstractButton *button )
 {
     if ( m_bInitializing )
         return;
@@ -348,7 +351,7 @@ void ClipParamDialog::on_missingGroup_clicked( QAbstractButton *button )
     }
 }
 
-void ClipParamDialog::on_batteriesGroup_clicked( QAbstractButton *button )
+void ClipParamDialog::onBatteriesGroup_clicked( QAbstractButton *button )
 {
     if ( m_bInitializing )
         return;
