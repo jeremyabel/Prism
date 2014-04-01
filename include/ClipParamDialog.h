@@ -26,6 +26,7 @@ private:
     Ui::ClipParamDialog* ui;
 
     bool                okOnLeft;
+    bool                m_bInitializing;
     ClipModel*          editingClip;
     const CategoryData* m_pCategoryData;
 

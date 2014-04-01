@@ -36,10 +36,13 @@ void CategoryData::initWithJson( QJsonObject jsonObject )
 
 const CategoryModel* CategoryData::getCategoryByName( const QString name ) const
 {
-    for ( int i = 0; i < categoryList->count(); i++ )
+    for ( int i = 0; i < categoryList->size(); i++ )
     {
         if ( categoryList->at(i)->name == name )
+        {
+            qDebug() << "FOUND";
             return categoryList->at(i);
+        }
     }
 
     return new CategoryModel();
