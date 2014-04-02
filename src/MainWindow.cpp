@@ -73,6 +73,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Start with new document if we can't open the old one
     if ( initOpenFailed )
     {
+        qDebug() << "No previous file found...";
+
+        m_pCategoryData = new CategoryData();
+
         // Add one new track
         TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
         addTrack( pTrackModel );

@@ -1,5 +1,8 @@
 #include <QDate>
 #include <QDebug>
+
+#include <math.h>
+
 #include "ClipParamDialog.h"
 
 ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryData, QWidget *parent ) : QDialog(parent), ui(new Ui::ClipParamDialog)
@@ -66,7 +69,10 @@ ClipParamDialog::ClipParamDialog( ClipModel& clip, const CategoryData* categoryD
     m_pBatteriesGroup->setExclusive(true);
     connect( m_pBatteriesGroup, SIGNAL( buttonClicked(QAbstractButton*) ), SLOT( onBatteriesGroup_clicked(QAbstractButton*) ) );
 
-    if ( m_pCategoryData )
+    // Set image distribution combo box
+    ui->distroComboBox->setCurrentIndex( log(editingClip->distro16th) / log(2) );
+
+    if ( m_pCategoryData && m_pCategoryData->path.length() > 0 )
     {
         int index = 0;
 
@@ -261,6 +267,17 @@ void ClipParamDialog::on_buttonLeft_clicked()
 //------------------------------------------------------------------------------------------------------
 // Non-Checkbox-Related UI Activites
 //------------------------------------------------------------------------------------------------------
+
+void ClipParamDialog::on_distroComboBox_currentIndexChanged( int index )
+{
+    if ( m_bInitializing )
+        return;
+
+    QString result = ui->distroComboBox->itemText(index);
+    qDebug() << "Image Distribution changed:" << result;
+
+    editingClip->distro16th = pow(2, index);
+}
 
 void ClipParamDialog::on_catComboBox_currentIndexChanged( int index )
 {

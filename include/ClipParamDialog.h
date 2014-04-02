@@ -50,6 +50,7 @@ private slots:
     void on_buttonRight_clicked();
     void on_buttonLeft_clicked();
 
+    void on_distroComboBox_currentIndexChanged( int  index );
     void on_catComboBox_currentIndexChanged(    int  index );
     void on_subcatComboBox_currentIndexChanged( int  index );
     void on_colorComboBox_currentIndexChanged(  int  index );

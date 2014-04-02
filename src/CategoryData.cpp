@@ -3,9 +3,10 @@
 
 #include "CategoryData.h"
 
-CategoryData::CategoryData( )
+CategoryData::CategoryData()
 {
-
+    path = "";
+    categoryList = new QList<CategoryModel*>();
 }
 
 

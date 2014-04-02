@@ -11,6 +11,7 @@ public:
        starting16th         = start16th;
        length16th           = length16ths;
        ending16th           = starting16th + length16th;
+       distro16th           = 8;
 
        enableCategory       = false;
        enableSubCategory    = false;
@@ -35,6 +36,7 @@ public:
     {
         starting16th        = jsonObject.value("starting16th").toInt(0);
         length16th          = jsonObject.value("length16ths").toInt(4);
+        distro16th          = jsonObject.value("distro16ths").toInt(8);
         ending16th          = starting16th + length16th;
 
         enableCategory      = jsonObject.contains("category");
@@ -62,6 +64,7 @@ public:
 
         jsonObject["starting16th"] = starting16th;
         jsonObject["length16ths"]  = length16th;
+        jsonObject["distro16ths"]  = distro16th;
 
         if ( enableCategory )       jsonObject["category"]      = category;
         if ( enableSubCategory )    jsonObject["subcategory"]   = subCategory;
@@ -96,6 +99,7 @@ public:
     int     starting16th;
     int     length16th;
     int     ending16th;
+    int     distro16th;
 
     bool    enableCategory;
     bool    enableSubCategory;
