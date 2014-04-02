@@ -46,12 +46,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         if ( settings.contains("path") )
         {
             m_pCategoryData = new CategoryData();
+            m_pImageData    = new ImageData();
             m_sCurrentPath  = settings.value("path").toString();
             qDebug() << " Current path:" << m_sCurrentPath;
 
             // Attempt to load last file
             QList<TrackModel*> loadedTracks;
-            if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData ) )
+            if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData, m_pImageData ) )
             {
                 initOpenFailed = false;
 
@@ -76,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         qDebug() << "No previous file found...";
 
         m_pCategoryData = new CategoryData();
+        m_pImageData    = new ImageData();
 
         // Add one new track
         TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
@@ -502,7 +504,7 @@ void MainWindow::on_actionOpen_triggered()
 
     // Attempt to load from file
     QList<TrackModel*> loadedTracks;
-    if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData ) )
+    if ( FileManager::open( m_sCurrentPath, &loadedTracks, m_pCategoryData, m_pImageData ) )
     {
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("path", m_sCurrentPath);
@@ -594,7 +596,7 @@ void MainWindow::on_actionImport_triggered()
 
     m_pCategoryData = new CategoryData();
     m_sCategoryPath = dialog.selectedFiles().at(0);
-    if ( FileManager::import( m_sCategoryPath, m_pCategoryData ) )
+    if ( FileManager::import( m_sCategoryPath, m_pCategoryData, m_pImageData ) )
     {
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("categoryPath", m_sCategoryPath);

@@ -9,6 +9,7 @@
 #include "CategoryData.h"
 #include "ClipModel.h"
 #include "ClipItem.h"
+#include "ImageData.h"
 #include "TrackItem.h"
 #include "TimelineItem.h"
 
@@ -63,6 +64,7 @@ private:
     TrackItem*              m_pOriginalTrack;
     TrackItem*              m_pHoverTrack;
     CategoryData*           m_pCategoryData;
+    ImageData*              m_pImageData;
 
     QString                 m_sCurrentPath;
     QString                 m_sCategoryPath;

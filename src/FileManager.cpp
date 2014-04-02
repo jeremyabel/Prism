@@ -1,6 +1,8 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QMap>
+#include <QVariant>
 #include <QFile>
 #include <QDebug>
 
@@ -35,7 +37,7 @@ bool FileManager::saveToFile( QString path, QString categoryPath, QList<TrackMod
 }
 
 
-bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, CategoryData* const categoryData )
+bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, CategoryData* const categoryData, ImageData* const imageData )
 {
     trackModels->clear();
 
@@ -63,7 +65,7 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, Cat
     if ( jsonObject.contains("categoryPath") )
     {
         QString categoryPath = jsonObject.value("categoryPath").toString("");
-        FileManager::import( categoryPath, categoryData );
+        FileManager::import( categoryPath, categoryData, imageData );
         qDebug() << "Loaded category data from" << categoryPath;
         qDebug() << categoryData->categoryList->size();
     }
@@ -74,7 +76,7 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, Cat
 }
 
 
-bool FileManager::import( QString path, CategoryData* categoryData )
+bool FileManager::import( QString path, CategoryData* categoryData, ImageData* imageData )
 {
     QString jsonFromFile;
     QFile file;
@@ -89,5 +91,14 @@ bool FileManager::import( QString path, CategoryData* categoryData )
 
     categoryData->initWithJson( jsonObject );
     categoryData->path = path;
+
+    imageData->initWithJson( jsonObject );
+
+    return true;
+}
+
+
+bool FileManager::exportToXML( QString path, const QList<TrackModel *> *trackModels, const CategoryData *categoryData )
+{
     return true;
 }
