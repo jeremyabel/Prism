@@ -24,7 +24,9 @@ SOURCES += src/main.cpp\
     src/RenameTrackDialog.cpp \
     src/FileManager.cpp \
     src/CategoryData.cpp \
-    src/ExportDialog.cpp
+    src/ExportDialog.cpp \
+    lib/sqlite3/sqlite3.c \
+    src/ImageData.cpp
 
 HEADERS  += include/ClipItem.h \
     include/TrackItem.h \
@@ -38,7 +40,9 @@ HEADERS  += include/ClipItem.h \
     include/RenameTrackDialog.h \
     include/FileManager.h \
     include/CategoryData.h \
-    include/ExportDialog.h
+    include/ExportDialog.h \
+    lib/sqlite3/sqlite3.h \
+    include/ImageData.h
 
 FORMS    += forms/MainWindow.ui \
     forms/ClipParamDialog.ui \
