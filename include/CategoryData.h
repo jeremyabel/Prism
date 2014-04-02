@@ -15,6 +15,7 @@ public:
     QList<QVariant> *subcategories;
 };
 
+
 class CategoryData
 {
 public:
