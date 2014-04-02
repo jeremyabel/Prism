@@ -25,8 +25,8 @@ SOURCES += src/main.cpp\
     src/FileManager.cpp \
     src/CategoryData.cpp \
     src/ExportDialog.cpp \
-    lib/sqlite3/sqlite3.c \
-    src/ImageData.cpp
+    src/ImageData.cpp \
+    thirdparty/sqlite3/sqlite3.c
 
 HEADERS  += include/ClipItem.h \
     include/TrackItem.h \
@@ -41,8 +41,8 @@ HEADERS  += include/ClipItem.h \
     include/FileManager.h \
     include/CategoryData.h \
     include/ExportDialog.h \
-    lib/sqlite3/sqlite3.h \
-    include/ImageData.h
+    include/ImageData.h \
+    thirdparty/sqlite3/sqlite3.h
 
 FORMS    += forms/MainWindow.ui \
     forms/ClipParamDialog.ui \
