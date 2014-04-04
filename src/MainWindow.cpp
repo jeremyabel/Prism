@@ -616,7 +616,12 @@ void MainWindow::on_actionExport_triggered()
 {
     qDebug() << "action: Export...";
 
-    FileManager::exportToXML("", NULL, m_pCategoryData, m_pImageData);
+    // Put track models into list
+    QList<TrackModel*> trackModels;
+    for ( int i = 0; i < m_pTrackItems.size(); i++ )
+        trackModels.append( m_pTrackItems[i]->pTrackModel );
+
+    FileManager::exportToXML("", &trackModels, m_pCategoryData, m_pImageData);
 
     /*
     // Prep file dialog

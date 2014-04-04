@@ -100,7 +100,7 @@ bool FileManager::import( QString path, CategoryData* categoryData, ImageData* i
 }
 
 
-bool FileManager::exportToXML( QString path, const QList<TrackModel *>* trackModels, const CategoryData* categoryData, const ImageData* imageData )
+bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, const CategoryData* categoryData, const ImageData* imageData )
 {
     QString xmlOutput;
     int     imgCount = 0;
@@ -109,7 +109,7 @@ bool FileManager::exportToXML( QString path, const QList<TrackModel *>* trackMod
     stream.setAutoFormatting(true);
     stream.writeStartDocument();
 
-    // Setup
+    // Make XML...
     stream.writeStartElement("xmeml");
     stream.writeAttribute("version", "4");
         stream.writeStartElement("project");
@@ -238,6 +238,97 @@ bool FileManager::exportToXML( QString path, const QList<TrackModel *>* trackMod
                                 stream.writeEndElement(); // bin
 
                             } // categories
+
+                            // ...Sequence time!!
+                            stream.writeStartElement("sequence");
+
+                                QString uuidString = QUuid::createUuid().toString();
+                                uuidString.remove(0, 1);
+                                uuidString.remove(uuidString.length() - 1, 1);
+                                stream.writeTextElement("uuid", uuidString);
+
+                                // TODO: Put stuff here
+                                stream.writeTextElement("duration", "150");
+                                stream.writeStartElement("rate");
+                                    stream.writeTextElement("timebase", QString::number(6));
+                                    stream.writeTextElement("ntsc", "FALSE");
+                                stream.writeEndElement(); // rate
+                                stream.writeTextElement("name", "prism-sequence-1");
+
+                                stream.writeStartElement("media");
+                                    stream.writeStartElement("video");
+
+                                        // Format data
+                                        stream.writeStartElement("format");
+                                            stream.writeStartElement("samplecharacteristics");
+                                                stream.writeStartElement("rate");
+                                                    stream.writeTextElement("timebase", QString::number(6));
+                                                    stream.writeTextElement("ntsc", "FALSE");
+                                                stream.writeEndElement(); // rate
+                                                stream.writeStartElement("codec");
+                                                    stream.writeTextElement("name", "Apple ProRes 422");
+                                                    stream.writeStartElement("appspecificdata");
+                                                        stream.writeTextElement("appname", "Final Cut Pro");
+                                                        stream.writeTextElement("appmanufacturer", "Apple Inc.");
+                                                        stream.writeTextElement("appversion", "7.0");
+                                                        stream.writeStartElement("data");
+                                                            stream.writeStartElement("qtcodec");
+                                                                stream.writeTextElement("codecname", "Apple ProRes 422");
+                                                                stream.writeTextElement("codectypename", "Apple ProRes 422");
+                                                                stream.writeTextElement("codectypecode", "apcn");
+                                                                stream.writeTextElement("codecvendorcode", "appl");
+                                                                stream.writeTextElement("spatialquality", "1024");
+                                                                stream.writeTextElement("temporalquality", "0");
+                                                                stream.writeTextElement("keyframerate", "0");
+                                                                stream.writeTextElement("datarate", "0");
+                                                            stream.writeEndElement(); // qtcodec
+                                                        stream.writeEndElement(); // data
+                                                    stream.writeEndElement(); // appspecificdata
+                                                stream.writeEndElement(); // codec
+                                                stream.writeTextElement("width", "1920");
+                                                stream.writeTextElement("height", "1080");
+                                                stream.writeTextElement("anamorphic", "FALSE");
+                                                stream.writeTextElement("pixelaspectratio", "square");
+                                                stream.writeTextElement("fielddominance", "none");
+                                                stream.writeTextElement("colordepth", "24");
+                                            stream.writeEndElement(); // samplecharacteristics
+                                        stream.writeEndElement(); // format
+
+                                        // Insert track data
+                                        for ( int i = 0; i < trackModels->size(); i++ )
+                                        {
+                                            stream.writeStartElement("track");
+                                            stream.writeTextElement("enabled", "TRUE");
+                                            stream.writeTextElement("locked", "FALSE");
+
+                                            const TrackModel* trackModel = trackModels->at(i);
+
+                                            // Insert clip data
+                                            for ( int j = 0; j < trackModel->pClips.size(); j++ )
+                                            {
+                                                ClipModel* clipModel = trackModel->pClips.at(j);
+
+                                            }
+
+                                            stream.writeEndElement(); // track
+                                        }
+
+                                    stream.writeEndElement(); // video
+
+                                    // Timecode data
+                                    stream.writeStartElement("timecode");
+                                        stream.writeStartElement("rate");
+                                            stream.writeTextElement("timebase", QString::number(6));
+                                            stream.writeTextElement("ntsc", "FALSE");
+                                        stream.writeEndElement(); // rate
+                                        stream.writeTextElement("string", "00:00:00:00");
+                                        stream.writeTextElement("frame", "0");
+                                        stream.writeTextElement("displayformat", "NDF");
+                                    stream.writeEndElement(); // timecode
+
+                                stream.writeEndElement(); // media
+
+                            stream.writeEndElement(); // sequence
 
                             stream.writeEndElement(); // children
                         stream.writeEndElement(); // bin
