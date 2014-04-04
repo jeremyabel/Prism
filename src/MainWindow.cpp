@@ -616,6 +616,9 @@ void MainWindow::on_actionExport_triggered()
 {
     qDebug() << "action: Export...";
 
+    FileManager::exportToXML("", NULL, m_pCategoryData, m_pImageData);
+
+    /*
     // Prep file dialog
     QFileDialog dialog( this );
     dialog.setFileMode( QFileDialog::AnyFile );
@@ -628,6 +631,7 @@ void MainWindow::on_actionExport_triggered()
         qDebug() << "...closed";
         return;
     }
+    */
 }
 
 

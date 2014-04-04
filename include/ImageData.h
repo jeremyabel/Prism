@@ -39,10 +39,10 @@ public:
     void initWithJson( QJsonObject jsonObject );
     void close();
 
-    QList<QString> makeQuery( QMap<ParameterType, QVariant> queryMap );
+    QList<QString> makeQuery( QMap<ParameterType, QVariant> queryMap ) const;
 
 private:
-    int  boolToInt( bool value ) { return value ? 1 : 0; }
+    int  boolToInt( bool value ) const { return value ? 1 : 0; }
 
     QMap<ParameterType, QString> m_paramToStringMap;
     sqlite3* m_pDatabase;

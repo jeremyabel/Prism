@@ -1,10 +1,13 @@
+#include <QDebug>
+#include <QXmlStreamWriter>
+#include <QFile>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QList>
 #include <QMap>
+#include <QUuid>
 #include <QVariant>
-#include <QFile>
-#include <QDebug>
 
 #include "FileManager.h"
 
@@ -67,7 +70,6 @@ bool FileManager::open( QString path, QList<TrackModel*>* const trackModels, Cat
         QString categoryPath = jsonObject.value("categoryPath").toString("");
         FileManager::import( categoryPath, categoryData, imageData );
         qDebug() << "Loaded category data from" << categoryPath;
-        qDebug() << categoryData->categoryList->size();
     }
     else
         qDebug() << "No category data found...";
@@ -98,7 +100,156 @@ bool FileManager::import( QString path, CategoryData* categoryData, ImageData* i
 }
 
 
-bool FileManager::exportToXML( QString path, const QList<TrackModel *> *trackModels, const CategoryData *categoryData )
+bool FileManager::exportToXML( QString path, const QList<TrackModel *>* trackModels, const CategoryData* categoryData, const ImageData* imageData )
 {
+    QString xmlOutput;
+    int     imgCount = 0;
+
+    QXmlStreamWriter stream(&xmlOutput);
+    stream.setAutoFormatting(true);
+    stream.writeStartDocument();
+
+    // Setup
+    stream.writeStartElement("xmeml");
+    stream.writeAttribute("version", "4");
+        stream.writeStartElement("project");
+            stream.writeTextElement("name", "Chakra_Test");
+            stream.writeStartElement("children");
+                stream.writeStartElement("bin");
+                    stream.writeTextElement("name", "FROM PRISM");
+                    stream.writeStartElement("children");
+                        stream.writeStartElement("bin");
+                            stream.writeTextElement("name", "STILLS");
+                            stream.writeStartElement("children");
+
+                            // Organize images into category bins
+                            for ( int i = 0; i < categoryData->categoryList->size(); i++ )
+                            {
+                                CategoryModel* catModel = categoryData->categoryList->at(i);
+
+                                stream.writeStartElement("bin");
+                                    stream.writeTextElement("name", catModel->name);
+                                    stream.writeStartElement("children");
+
+                                        // Get category images
+                                        QMap<ImageData::ParameterType, QVariant> query;
+                                        query.insert(ImageData::CATEGORY, QVariant(catModel->name));
+                                        QList<QString> imageResults = imageData->makeQuery(query);
+
+                                        // Write clip data
+                                        for ( int j = 0; j < imageResults.size(); j++ )
+                                        {
+                                            QString masterID = "masterclip-" + QString::number(imgCount);
+
+                                            stream.writeStartElement("clip");
+                                            stream.writeAttribute("id", masterID);
+
+                                                QString uuidString = QUuid::createUuid().toString();
+                                                uuidString.remove(0, 1);
+                                                uuidString.remove(uuidString.length() - 1, 1);
+                                                stream.writeTextElement("uuid", uuidString);
+
+                                                stream.writeTextElement("masterclipid", masterID);
+                                                stream.writeTextElement("ismasterclip", "TRUE");
+                                                stream.writeTextElement("duration", QString::number(150));
+                                                stream.writeStartElement("rate");
+                                                    stream.writeTextElement("timebase", QString::number(30));
+                                                    stream.writeTextElement("ntsc", "TRUE");
+                                                stream.writeEndElement(); // rate
+                                                stream.writeTextElement("in", "0");
+                                                stream.writeTextElement("out", "0");
+                                                stream.writeTextElement("name", QString::number(imgCount));
+                                                stream.writeStartElement("media");
+                                                    stream.writeStartElement("video");
+                                                        stream.writeStartElement("track");
+                                                            stream.writeStartElement("clipitem");
+                                                                stream.writeAttribute("id", masterID);
+
+                                                                stream.writeTextElement("masterclipid", masterID);
+                                                                stream.writeTextElement("name", QString::number(imgCount));
+                                                                stream.writeTextElement("alphatype", "none");
+                                                                stream.writeStartElement("file");
+                                                                stream.writeAttribute("id", "file-" + QString::number(imgCount));
+
+                                                                    stream.writeTextElement("name", QString::number(imgCount));
+                                                                    stream.writeTextElement("pathurl", imageResults[j]);
+                                                                    stream.writeStartElement("rate");
+                                                                        stream.writeTextElement("timebase", QString::number(30));
+                                                                        stream.writeTextElement("ntsc", "TRUE");
+                                                                    stream.writeEndElement(); // rate
+
+                                                                    stream.writeStartElement("timecode");
+                                                                        stream.writeStartElement("rate");
+                                                                            stream.writeTextElement("timebase", QString::number(30));
+                                                                            stream.writeTextElement("ntsc", "TRUE");
+                                                                        stream.writeEndElement(); // rate
+                                                                        stream.writeTextElement("string", "00;00;00;00");
+                                                                        stream.writeTextElement("frame", "0");
+                                                                        stream.writeTextElement("displayformat", "DF");
+                                                                        stream.writeStartElement("reel");
+                                                                            stream.writeEmptyElement("name");
+                                                                        stream.writeEndElement(); // reel
+                                                                    stream.writeEndElement(); // timecode
+
+                                                                    stream.writeStartElement("media");
+                                                                        stream.writeStartElement("video");
+                                                                            stream.writeTextElement("duration", "18000");
+                                                                            stream.writeStartElement("samplecharacteristics");
+                                                                                stream.writeStartElement("rate");
+                                                                                    stream.writeTextElement("timebase", QString::number(30));
+                                                                                    stream.writeTextElement("ntsc", "TRUE");
+                                                                                stream.writeEndElement(); // rate
+                                                                                stream.writeTextElement("width", "1024");
+                                                                                stream.writeTextElement("height", "768");
+                                                                                stream.writeTextElement("anamorphic", "FALSE");
+                                                                                stream.writeTextElement("pixelaspectratio", "square");
+                                                                                stream.writeTextElement("fielddominance", "none");
+                                                                            stream.writeEndElement(); // samplecharacteristics
+                                                                        stream.writeEndElement(); // video
+                                                                    stream.writeEndElement(); // media
+
+                                                                stream.writeEndElement(); // file
+
+                                                                stream.writeStartElement("link");
+                                                                    stream.writeTextElement("linkclipref", masterID);
+                                                                    stream.writeTextElement("mediatype", "video");
+                                                                    stream.writeTextElement("trackindex", "1");
+                                                                    stream.writeTextElement("clipindex", "1");
+                                                                stream.writeEndElement(); // link
+
+                                                            stream.writeEndElement(); // clipitem
+                                                        stream.writeEndElement(); // track
+                                                    stream.writeEndElement(); // video
+                                                stream.writeEndElement(); // media
+
+                                                stream.writeStartElement("logginginfo");
+                                                    stream.writeEmptyElement("description");
+                                                    stream.writeEmptyElement("scene");
+                                                    stream.writeEmptyElement("shottake");
+                                                    stream.writeEmptyElement("lognote");
+                                                stream.writeEndElement(); // logginginfo
+
+                                            stream.writeEndElement(); // clip
+
+                                            imgCount++;
+                                        } // images
+
+                                    stream.writeEndElement(); // children
+                                stream.writeEndElement(); // bin
+
+                            } // categories
+
+                            stream.writeEndElement(); // children
+                        stream.writeEndElement(); // bin
+                    stream.writeEndElement(); // children
+                stream.writeEndElement(); // bin
+            stream.writeEndElement(); // children
+        stream.writeEndElement(); // project
+    stream.writeEndElement(); // xmeml
+
+    stream.writeEndDocument();
+
+    qDebug() << xmlOutput;
+
     return true;
 }

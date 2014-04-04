@@ -89,7 +89,7 @@ void ImageData::initWithJson( QJsonObject jsonObject )
 }
 
 
-QList<QString> ImageData::makeQuery( QMap<ParameterType, QVariant> queryMap )
+QList<QString> ImageData::makeQuery( QMap<ParameterType, QVariant> queryMap ) const
 {
     char* zErrMsg = 0;
     QList< QMap<QString, QString> >* data = new QList< QMap<QString, QString> >();
