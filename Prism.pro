@@ -26,7 +26,8 @@ SOURCES += src/main.cpp\
     src/CategoryData.cpp \
     src/ExportDialog.cpp \
     src/ImageData.cpp \
-    thirdparty/sqlite3/sqlite3.c
+    thirdparty/sqlite3/sqlite3.c \
+    src/ClipModel.cpp
 
 HEADERS  += include/ClipItem.h \
     include/TrackItem.h \

@@ -89,13 +89,13 @@ void ImageData::initWithJson( QJsonObject jsonObject )
 }
 
 
-QList<QString> ImageData::makeQuery( QMap<ParameterType, QVariant> queryMap ) const
+QList<ImageModel> ImageData::makeQuery( QueryMap queryMap )
 {
     char* zErrMsg = 0;
-    QList< QMap<QString, QString> >* data = new QList< QMap<QString, QString> >();
+    StringMapList* data = new StringMapList();
 
     // Formulate query
-    QString sqlQuery = "SELECT * from IMAGES where ";
+    QString sqlQuery = "SELECT * from IMAGES " + (queryMap.size() > 0 ? "where " : "");
     bool multiQuery = queryMap.size() > 1;
     while ( queryMap.size() > 0 )
     {
@@ -123,15 +123,23 @@ QList<QString> ImageData::makeQuery( QMap<ParameterType, QVariant> queryMap ) co
         else if ( queryMap.contains(BATTERIES) )
             sqlQuery += "BATTERIES="    + QString::number( boolToInt( queryMap.take(BATTERIES).toBool() ) );
 
-
         if ( queryMap.size() >= 1 && multiQuery )
             sqlQuery += "AND ";
     }
 
-    qDebug() << "Making query:" << sqlQuery.simplified();
+    sqlQuery = sqlQuery.simplified();
+
+    // Look to see if we've done this query before
+    if ( m_prevQueries.contains(sqlQuery) )
+    {
+        qDebug() << "Found existing data for query:";
+        return m_prevQueries.value( sqlQuery );
+    }
+
+    qDebug() << "Making query:" << sqlQuery;
 
     // Make query
-    int rc = sqlite3_exec(m_pDatabase, sqlQuery.simplified().toLocal8Bit().data(), callback, (void*)data, &zErrMsg);
+    int rc = sqlite3_exec(m_pDatabase, sqlQuery.toLocal8Bit().data(), callback, (void*)data, &zErrMsg);
     if ( rc != SQLITE_OK )
     {
         qDebug() << "SQL Error:" << zErrMsg;
@@ -139,12 +147,20 @@ QList<QString> ImageData::makeQuery( QMap<ParameterType, QVariant> queryMap ) co
     }
 
     // Cast void* data to something useful
-    QList< QMap<QString, QString> >* dataList = static_cast<QList< QMap<QString, QString> >*>(data);
+    StringMapList* dataList = static_cast<StringMapList*>(data);
 
     // Save paths
-    QList<QString> results;
+    QList<ImageModel> results;
     for ( int i = 0; i < dataList->size(); i++ )
-        results.append( dataList->at(i).value("PATH") );
+    {
+        ImageModel model;
+        model.path = dataList->at(i).value("PATH");
+        model.name = model.path.section('/', -1);
+        results.append(model);
+    }
+
+    // Add to the pile
+    m_prevQueries.insert(sqlQuery, results);
 
     qDebug() << "Found" << results.size() << "matching images";
     return results;
@@ -155,4 +171,10 @@ void ImageData::close()
 {
     qDebug() << "ImageData close";
     sqlite3_close(m_pDatabase);
+}
+
+uint qHash(const QueryMap &key)
+{
+    Q_UNUSED(key);
+    return 0;
 }
