@@ -95,7 +95,8 @@ QList<ImageModel> ImageData::makeQuery( QueryMap queryMap )
     StringMapList* data = new StringMapList();
 
     // Formulate query
-    QString sqlQuery = "SELECT * from IMAGES " + (queryMap.size() > 0 ? "where " : "");
+    QString sqlQuery = "SELECT * from IMAGES ";
+    sqlQuery += (queryMap.size() > 0 ? "where " : "");
     bool multiQuery = queryMap.size() > 1;
     while ( queryMap.size() > 0 )
     {

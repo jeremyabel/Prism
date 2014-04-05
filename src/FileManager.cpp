@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QList>
 #include <QMap>
+#include <QTime>
 #include <QUuid>
 #include <QVariant>
 
@@ -298,6 +299,9 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                             stream.writeEndElement(); // samplecharacteristics
                                         stream.writeEndElement(); // format
 
+                                        // Set random seed
+                                        qsrand((uint)QTime::currentTime().msec());
+
                                         // Insert track data
                                         for ( int i = 0; i < trackModels->size(); i++ )
                                         {
@@ -310,9 +314,41 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                             // Insert clip data
                                             for ( int j = 0; j < trackModel->pClips.size(); j++ )
                                             {
-                                                ClipModel* clipModel = trackModel->pClips.at(j);
+                                                ClipModel* clipModel        = trackModel->pClips.at(j);
+                                                QList<ImageModel> images    = imageData->makeQuery( clipModel->getImageQuery() );
 
-                                                //QList<ImageModel> images =
+                                                int startFrame  = ClipModel::getFrameFrom16th(clipModel->starting16th, bpm, fps);
+                                                int endFrame    = ClipModel::getFrameFrom16th(clipModel->ending16th,   bpm, fps);
+                                                int invDiv      = 16 / clipModel->distro16th;
+                                                int nImages     = (int)floor((endFrame - startFrame) / invDiv);
+
+                                                // One clip for each image
+                                                for ( int k = 0; k < nImages; k++ )
+                                                {
+                                                    // Select image to use
+                                                    // TODO: This is non-exhaustive!
+                                                    ImageModel imgModel = images.at(qrand() % images.size());
+
+                                                    int imgStart16th    = clipModel->starting16th + k * invDiv;
+                                                    int imgEnd16th      = imgStart16th + invDiv;
+                                                    int imgStartFrame   = ClipModel::getFrameFrom16th(imgStart16th, bpm, fps);
+                                                    int imgEndFrame     = ClipModel::getFrameFrom16th(imgEnd16th,   bpm, fps);
+
+                                                    stream.writeStartElement("clipitem");
+                                                    stream.writeAttribute("id", "clipitem-" + QString::number(j * 10 + k));
+                                                        stream.writeTextElement("masterclipid", imgModel.clipID);
+                                                        stream.writeTextElement("name",         imgModel.name);
+                                                        stream.writeTextElement("enabled",      "TRUE");
+                                                        stream.writeTextElement("duration",     "2589410");
+                                                        stream.writeTextElement("start",        QString::number(imgStartFrame));
+                                                        stream.writeTextElement("end",          QString::number(imgEndFrame));
+                                                        stream.writeTextElement("in",           "0");
+                                                        stream.writeTextElement("out",          QString::number(imgEndFrame - imgStartFrame));
+                                                        stream.writeTextElement("alphatype",    "none");
+                                                        stream.writeEmptyElement("file");
+                                                        stream.writeAttribute("id",             imgModel.fileID);
+                                                    stream.writeEndElement(); // clipitem
+                                                }
                                             }
 
                                             stream.writeEndElement(); // track
