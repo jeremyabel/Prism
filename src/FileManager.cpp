@@ -113,6 +113,7 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
     stream.writeStartDocument();
 
     // Make XML...
+    stream.writeDTD("<!DOCTYPE xmeml>");
     stream.writeStartElement("xmeml");
     stream.writeAttribute("version", "4");
         stream.writeStartElement("project");
@@ -143,18 +144,17 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                         for ( int j = 0; j < imageResults.size(); j++ )
                                         {
                                             ImageModel img = imageResults.at(j);
-                                            img.clipID = "masterclip-" + QString::number(imgCount);
-                                            img.fileID = "file-" + QString::number(imgCount);
+                                            QString clipID = "clipitem-" + QString::number(imgCount + 1);
 
                                             stream.writeStartElement("clip");
-                                            stream.writeAttribute("id", img.clipID);
+                                            stream.writeAttribute("id", img.masterID);
 
                                                 QString uuidString = QUuid::createUuid().toString();
                                                 uuidString.remove(0, 1);
                                                 uuidString.remove(uuidString.length() - 1, 1);
                                                 stream.writeTextElement("uuid", uuidString);
 
-                                                stream.writeTextElement("masterclipid", img.clipID);
+                                                stream.writeTextElement("masterclipid", img.masterID);
                                                 stream.writeTextElement("ismasterclip", "TRUE");
                                                 stream.writeTextElement("duration", QString::number(150));
                                                 stream.writeStartElement("rate");
@@ -168,9 +168,9 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                                     stream.writeStartElement("video");
                                                         stream.writeStartElement("track");
                                                             stream.writeStartElement("clipitem");
-                                                                stream.writeAttribute("id", img.clipID);
+                                                                stream.writeAttribute("id", clipID);
 
-                                                                stream.writeTextElement("masterclipid", img.clipID);
+                                                                stream.writeTextElement("masterclipid", img.masterID);
                                                                 stream.writeTextElement("name", img.name);
                                                                 stream.writeTextElement("alphatype", "none");
                                                                 stream.writeStartElement("file");
@@ -216,7 +216,7 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                                                 stream.writeEndElement(); // file
 
                                                                 stream.writeStartElement("link");
-                                                                    stream.writeTextElement("linkclipref", img.clipID);
+                                                                    stream.writeTextElement("linkclipref", clipID);
                                                                     stream.writeTextElement("mediatype", "video");
                                                                     stream.writeTextElement("trackindex", "1");
                                                                     stream.writeTextElement("clipindex", "1");
@@ -240,12 +240,13 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                         } // images
 
                                     stream.writeEndElement(); // children
-                                stream.writeEndElement(); // bin
+                                stream.writeEndElement(); // bin - category
 
                             } // categories
 
                             // ...Sequence time!!
                             stream.writeStartElement("sequence");
+                            stream.writeAttribute("id", "sequence-1");
 
                                 QString uuidString = QUuid::createUuid().toString();
                                 uuidString.remove(0, 1);
@@ -270,26 +271,6 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                                     stream.writeTextElement("timebase", QString::number(lroundf(fps)));
                                                     stream.writeTextElement("ntsc", "FALSE");
                                                 stream.writeEndElement(); // rate
-                                                stream.writeStartElement("codec");
-                                                    stream.writeTextElement("name", "Apple ProRes 422");
-                                                    stream.writeStartElement("appspecificdata");
-                                                        stream.writeTextElement("appname", "Final Cut Pro");
-                                                        stream.writeTextElement("appmanufacturer", "Apple Inc.");
-                                                        stream.writeTextElement("appversion", "7.0");
-                                                        stream.writeStartElement("data");
-                                                            stream.writeStartElement("qtcodec");
-                                                                stream.writeTextElement("codecname", "Apple ProRes 422");
-                                                                stream.writeTextElement("codectypename", "Apple ProRes 422");
-                                                                stream.writeTextElement("codectypecode", "apcn");
-                                                                stream.writeTextElement("codecvendorcode", "appl");
-                                                                stream.writeTextElement("spatialquality", "1024");
-                                                                stream.writeTextElement("temporalquality", "0");
-                                                                stream.writeTextElement("keyframerate", "0");
-                                                                stream.writeTextElement("datarate", "0");
-                                                            stream.writeEndElement(); // qtcodec
-                                                        stream.writeEndElement(); // data
-                                                    stream.writeEndElement(); // appspecificdata
-                                                stream.writeEndElement(); // codec
                                                 stream.writeTextElement("width", "1920");
                                                 stream.writeTextElement("height", "1080");
                                                 stream.writeTextElement("anamorphic", "FALSE");
@@ -316,14 +297,10 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                             {
                                                 ClipModel* clipModel        = trackModel->pClips.at(j);
                                                 QList<ImageModel> images    = imageData->makeQuery( clipModel->getImageQuery() );
-
-                                                int startFrame  = ClipModel::getFrameFrom16th(clipModel->starting16th, bpm, fps);
-                                                int endFrame    = ClipModel::getFrameFrom16th(clipModel->ending16th,   bpm, fps);
-                                                int invDiv      = 16 / clipModel->distro16th;
-                                                int nImages     = (int)floor((endFrame - startFrame) / invDiv);
+                                                int invDiv                  = 16 / clipModel->distro16th;
 
                                                 // One clip for each image
-                                                for ( int k = 0; k < nImages; k++ )
+                                                for ( int k = 0; k < clipModel->length16th / invDiv; k++ )
                                                 {
                                                     // Select image to use
                                                     // TODO: This is non-exhaustive!
@@ -335,8 +312,8 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                                     int imgEndFrame     = ClipModel::getFrameFrom16th(imgEnd16th,   bpm, fps);
 
                                                     stream.writeStartElement("clipitem");
-                                                    stream.writeAttribute("id", "clipitem-" + QString::number(j * 10 + k));
-                                                        stream.writeTextElement("masterclipid", imgModel.clipID);
+                                                    stream.writeAttribute("id", "clipitem-" + QString::number(i * 100 + j * 10 + k));
+                                                        stream.writeTextElement("masterclipid", imgModel.masterID);
                                                         stream.writeTextElement("name",         imgModel.name);
                                                         stream.writeTextElement("enabled",      "TRUE");
                                                         stream.writeTextElement("duration",     "2589410");
@@ -372,9 +349,9 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                             stream.writeEndElement(); // sequence
 
                             stream.writeEndElement(); // children
-                        stream.writeEndElement(); // bin
+                        stream.writeEndElement(); // bin - STILLS
                     stream.writeEndElement(); // children
-                stream.writeEndElement(); // bin
+                stream.writeEndElement(); // bin - FROM PRISM
             stream.writeEndElement(); // children
         stream.writeEndElement(); // project
     stream.writeEndElement(); // xmeml
