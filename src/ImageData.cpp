@@ -40,6 +40,7 @@ void ImageData::initWithJson( QJsonObject jsonObject )
                         "ID INT PRIMARY KEY         NOT NULL," \
                         "NAME           TEXT        NOT NULL," \
                         "PATH           TEXT        NOT NULL," \
+                        "MASTER_ID      TEXT        NOT NULL," \
                         "CLIP_ID        TEXT        NOT NULL," \
                         "FILE_ID        TEXT        NOT NULL," \
                         "CATEGORY       TEXT," \
@@ -63,13 +64,14 @@ void ImageData::initWithJson( QJsonObject jsonObject )
     {
         QJsonObject imageObj = imagesArray.at(i).toObject();
 
-        sqlString += "INSERT INTO IMAGES (ID,NAME,PATH,CLIP_ID,FILE_ID,CATEGORY,SUBCATEGORY,COLOR,YEAR,SIZE,BROKEN,MISSING,BATTERIES) ";
+        sqlString += "INSERT INTO IMAGES (ID,NAME,PATH,MASTER_ID,CLIP_ID,FILE_ID,CATEGORY,SUBCATEGORY,COLOR,YEAR,SIZE,BROKEN,MISSING,BATTERIES) ";
         sqlString += "VALUES (";
         sqlString += QString::number(i)                             + ", ";
         sqlString += "'" + imageObj["name"].toString()        + "'" + ", ";
         sqlString += "'" + imageObj["path"].toString()        + "'" + ", ";
-        sqlString += "'clipitem-" + QString::number(i)        + "'" + ", ";
-        sqlString += "'file-" + QString::number(i)            + "'" + ", ";
+        sqlString += "'masterclip-" + QString::number(i + 1)  + "'" + ", ";
+        sqlString += "'clipitem-" + QString::number(i + 1)    + "'" + ", ";
+        sqlString += "'file-" + QString::number(i + 1)        + "'" + ", ";
         sqlString += "'" + imageObj["category"].toString()    + "'" + ", ";
         sqlString += "'" + imageObj["subcategory"].toString() + "'" + ", ";
         sqlString += "'" + imageObj["color"].toString()       + "'" + ", ";
@@ -159,12 +161,15 @@ QList<ImageModel> ImageData::makeQuery( QueryMap queryMap )
     for ( int i = 0; i < dataList->size(); i++ )
     {
         ImageModel model;
-        model.path = dataList->at(i).value("PATH");
-        model.name = model.path.section('/', -1);
+        model.path      = dataList->at(i).value("PATH");
+        model.name      = dataList->at(i).value("NAME");
+        model.masterID  = dataList->at(i).value("MASTER_ID");
+        model.clipID    = dataList->at(i).value("CLIP_ID");
+        model.fileID    = dataList->at(i).value("FILE_ID");
         results.append(model);
     }
 
-    // Add to the pile
+    // Add to the list of previous queries
     m_prevQueries.insert(sqlQuery, results);
 
     qDebug() << "Found" << results.size() << "matching images";

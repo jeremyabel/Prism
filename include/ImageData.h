@@ -13,6 +13,7 @@ struct ImageModel
 {
     QString path;
     QString name;
+    QString masterID;
     QString clipID;
     QString fileID;
 };
