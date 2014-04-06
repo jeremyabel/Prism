@@ -40,6 +40,8 @@ void ImageData::initWithJson( QJsonObject jsonObject )
                         "ID INT PRIMARY KEY         NOT NULL," \
                         "NAME           TEXT        NOT NULL," \
                         "PATH           TEXT        NOT NULL," \
+                        "CLIP_ID        TEXT        NOT NULL," \
+                        "FILE_ID        TEXT        NOT NULL," \
                         "CATEGORY       TEXT," \
                         "SUBCATEGORY    TEXT," \
                         "COLOR          TEXT," \
@@ -61,11 +63,13 @@ void ImageData::initWithJson( QJsonObject jsonObject )
     {
         QJsonObject imageObj = imagesArray.at(i).toObject();
 
-        sqlString += "INSERT INTO IMAGES (ID,NAME,PATH,CATEGORY,SUBCATEGORY,COLOR,YEAR,SIZE,BROKEN,MISSING,BATTERIES) ";
+        sqlString += "INSERT INTO IMAGES (ID,NAME,PATH,CLIP_ID,FILE_ID,CATEGORY,SUBCATEGORY,COLOR,YEAR,SIZE,BROKEN,MISSING,BATTERIES) ";
         sqlString += "VALUES (";
         sqlString += QString::number(i)                             + ", ";
         sqlString += "'" + imageObj["name"].toString()        + "'" + ", ";
         sqlString += "'" + imageObj["path"].toString()        + "'" + ", ";
+        sqlString += "'clipitem-" + QString::number(i)        + "'" + ", ";
+        sqlString += "'file-" + QString::number(i)            + "'" + ", ";
         sqlString += "'" + imageObj["category"].toString()    + "'" + ", ";
         sqlString += "'" + imageObj["subcategory"].toString() + "'" + ", ";
         sqlString += "'" + imageObj["color"].toString()       + "'" + ", ";
