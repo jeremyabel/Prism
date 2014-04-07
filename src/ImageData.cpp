@@ -193,6 +193,7 @@ QString ImageData::getSqlStringFromQuery( QueryMap queryMap, bool forceUnused )
     return sqlQuery.simplified();
 }
 
+
 void ImageData::setImageUsedState( ImageModel targetImage, bool used )
 {
     QString usedString = QString::number(boolToInt(used));
