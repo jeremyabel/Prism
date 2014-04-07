@@ -21,6 +21,7 @@
 const int               MAX_SPACING = 200;
 const int               MIN_SPACING = 24;
 const int               TICK_HEIGHT = 15;
+const int               MIN_IMAGES  = 1;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -94,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow()
 {
+    m_pImageData->close();
     delete ui;
 }
 
@@ -338,7 +340,7 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
         ui->statusBar->showMessage( "Matches " + QString::number(matches) + imgs + clip->pClipModel->getStatusMessage() );
 
         // Alert if query doesn't match enough images
-        if ( matches <= 1 )
+        if ( matches <= MIN_IMAGES )
         {
             QString matchString = "doens't match any images.";
             if ( matches > 0)
@@ -548,6 +550,8 @@ void MainWindow::on_actionOpen_triggered()
             addTrack( loadedTracks[i] );
 
         m_bModified = false;
+
+        ui->statusBar->showMessage("Loaded " + QString::number(loadedTracks.size()) + " track(s) " + "from " + m_sCurrentPath + ".", 10000 );
     }
 }
 
@@ -558,7 +562,9 @@ void MainWindow::on_actionSave_triggered()
 
     // Just run Save As if we've never saved before
     if ( m_sCurrentPath.length() <= 0 )
+    {
         on_actionSave_As_triggered();
+    }
     else
     {
         // Put track models into list
@@ -567,7 +573,14 @@ void MainWindow::on_actionSave_triggered()
             trackModels.append( m_pTrackItems[i]->pTrackModel );
 
         // Write file to current path
-        FileManager::saveToFile( m_sCurrentPath, m_sCategoryPath, trackModels );
+        if ( FileManager::saveToFile( m_sCurrentPath, m_sCategoryPath, trackModels ) )
+        {
+            ui->statusBar->showMessage( "Saved successfully.", 2500 );
+        }
+        else
+        {
+            QMessageBox::critical( this, "Error", "There was a problem while saving :(", QMessageBox::Ok );
+        }
     }
 }
 
@@ -603,13 +616,11 @@ void MainWindow::on_actionSave_As_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("path", m_sCurrentPath);
 
-        ui->statusBar->showMessage( "Saved successfully", 2500 );
+        ui->statusBar->showMessage( "Saved successfully.", 2500 );
     }
     else
     {
-        QMessageBox msgBox;
-        msgBox.setText("There was a problem while saving :(");
-        msgBox.exec();
+        QMessageBox::critical( this, "Error", "There was a problem while saving :(", QMessageBox::Ok );
     }
 }
 
@@ -635,13 +646,11 @@ void MainWindow::on_actionImport_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("categoryPath", m_sCategoryPath);
 
-        ui->statusBar->showMessage( "Saved successfully", 2500 );
+        ui->statusBar->showMessage( "Metafile imported successfully.", 2500 );
     }
     else
     {
-        QMessageBox msgBox;
-        msgBox.setText("There was a problem importing this file :(");
-        msgBox.exec();
+        QMessageBox::critical( this, "Error", "There was a problem while importing :(", QMessageBox::Ok );
     }
 }
 
@@ -696,7 +705,7 @@ void MainWindow::on_actionExport_triggered()
     }
     else
     {
-        // TODO: Show error
+        QMessageBox::critical( this, "Error", "There was a problem while exporting :(", QMessageBox::Ok );
     }
 }
 
