@@ -10,13 +10,14 @@
 
 #include <math.h>
 
-#include "ClipParamDialog.h"
 #include "AddTrackDialog.h"
+#include "ClipParamDialog.h"
+#include "ExportDialog.h"
 #include "FileManager.h"
-#include "RemoveTrackDialog.h"
-#include "RenameTrackDialog.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "RemoveTrackDialog.h"
+#include "RenameTrackDialog.h"
 
 const int               MAX_SPACING = 200;
 const int               MIN_SPACING = 24;
@@ -615,27 +616,47 @@ void MainWindow::on_actionExport_triggered()
 {
     qDebug() << "action: Export...";
 
+    // Get previous export settings
+    QSettings settings("jeremyabel.com", "Prism");
+    float bpm = settings.value( "bpm", QVariant(120.00f) ).toFloat();
+    float fps = settings.value( "fps", QVariant(60.00f)  ).toFloat();
+
+    // Show export settings dialog
+    ExportDialog* exportDialog = new ExportDialog( bpm, fps, this );
+
+    if ( !exportDialog->exec() )
+    {
+        qDebug() << "...closed";
+        return;
+    }
+
     // Put track models into list
     QList<TrackModel*> trackModels;
     for ( int i = 0; i < m_pTrackItems.size(); i++ )
         trackModels.append( m_pTrackItems[i]->pTrackModel );
 
-    FileManager::exportToXML("", &trackModels, m_pCategoryData, m_pImageData);
-
-    /*
     // Prep file dialog
     QFileDialog dialog( this );
     dialog.setFileMode( QFileDialog::AnyFile );
     dialog.setNameFilter( tr( "XML File (*.xml)" ) );
     dialog.setViewMode( QFileDialog::List );
     dialog.setAcceptMode( QFileDialog::AcceptSave );
+    dialog.setDirectory( settings.value( "exportPath", QVariant(QDir::homePath()) ).toString() );
 
     if ( !dialog.exec() )
     {
         qDebug() << "...closed";
         return;
     }
-    */
+
+    // Save settings
+    QString path = dialog.selectedFiles().at(0);
+    settings.setValue( "bpm",        QVariant(exportDialog->bpm) );
+    settings.setValue( "fps",        QVariant(exportDialog->fps) );
+    settings.setValue( "exportPath", QVariant(path) );
+
+    // Export!
+    FileManager::exportToXML(path, &trackModels, m_pCategoryData, m_pImageData, exportDialog->bpm, exportDialog->fps);
 }
 
 
