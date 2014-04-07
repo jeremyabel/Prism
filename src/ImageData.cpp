@@ -154,7 +154,7 @@ QString ImageData::getSqlStringFromQuery( QueryMap queryMap, bool forceUnused )
     if ( forceUnused )
     {
         sqlQuery += "where USED='0' ";
-        sqlQuery += (queryMap.size() > 1 ? "AND " : "");
+        sqlQuery += (queryMap.size() > 0 ? "AND " : "");
     }
     else
         sqlQuery += (queryMap.size() > 0 ? "where " : "");
