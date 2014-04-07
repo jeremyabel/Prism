@@ -51,6 +51,18 @@ void ClipItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setBrush( Qt::NoBrush );
     painter->setPen( color.darker() );
     painter->drawLine( m_fWidth - 1, 0, m_fWidth - 1, TRACK_HEIGHT - 1 );
+
+    // Draw divisions if we're long enough
+    if ( pClipModel->length16th + 1 > 16 / pClipModel->distro16th && pClipModel->distro16th <= m_iDivisions )
+    {
+        painter->setPen( color.darker(isSelected() ? 150 : 200) );
+
+        for ( int i = 1; i < pClipModel->length16th / (16 / pClipModel->distro16th); i++ )
+        {
+            float fLineX = (float)i * (m_fSpacing / (float)m_iInvDivisions * (float)(16 / pClipModel->distro16th) );
+            painter->drawLine( fLineX, 0, fLineX, TRACK_HEIGHT - 1 );
+        }
+    }
 }
 
 

@@ -82,8 +82,8 @@ QueryMap ClipModel::getImageQuery()
     if ( enableCategory )       query.insert( CATEGORY,     QVariant(category) );
     if ( enableSubCategory)     query.insert( SUBCATEGORY,  QVariant(subCategory) );
     if ( enableColor )          query.insert( COLOR,        QVariant(color) );
-    if ( enableAge )            query.insert( YEAR,         QVariant(year) );
     if ( enableSize )           query.insert( SIZE,         QVariant(size) );
+    if ( enableAge )            query.insert( YEAR,         QVariant(year) );
     if ( enableBroken )         query.insert( BROKEN,       QVariant(broken) );
     if ( enableMissingParts )   query.insert( MISSING,      QVariant(missingParts) );
     if ( enableBatteries )      query.insert( BATTERIES,    QVariant(batteries) );
@@ -99,6 +99,7 @@ QString ClipModel::getStatusMessage()
     bool multiQuery = queryMap.size() > 1;
     while ( queryMap.size() > 0 )
     {
+        // Trim long messages
         if ( message.length() > 99 )
         {
             message += "...";
@@ -142,7 +143,7 @@ QString ClipModel::getStatusMessage()
 int ClipModel::getFrameFrom16th( int note16th, float bpm, float fps )
 {
     float seconds = (float)note16th * (15.0f / bpm);
-    return lroundf(seconds * fps);
+    return lroundf( seconds * fps );
 }
 
 void ClipModel::setStarting16th( int value, bool force )
