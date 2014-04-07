@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QList>
 #include <QRectF>
+#include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
@@ -16,8 +17,6 @@
 #include "FileManager.h"
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "RemoveTrackDialog.h"
-#include "RenameTrackDialog.h"
 
 const int               MAX_SPACING = 200;
 const int               MIN_SPACING = 24;
@@ -362,22 +361,23 @@ void MainWindow::on_trackDoubleClicked( TrackItem *track )
     qDebug() << "Opening renaming dialog...";
 
     m_bDialogOpen = true;
-    m_bModified   = true;
+    m_bModified   = false;
 
-    QString origTrackName = track->pTrackModel->sName;
-    RenameTrackDialog* pRenameDialog = new RenameTrackDialog( track->pTrackModel, this );
+    bool ok;
+    QString text = QInputDialog::getText( this, tr("Rename Track"),
+                                          tr("Track name:"), QLineEdit::Normal,
+                                          track->pTrackModel->sName, &ok );
 
-    if ( pRenameDialog->exec() == 0 )
+    if ( ok && !text.isEmpty() )
     {
-        // Restore
-        qDebug() << "Restoring";
-        m_bModified = false;
-        track->pTrackModel->sName = origTrackName;
+        m_bModified = true;
+        track->pTrackModel->sName = text;
+        qDebug() << "Track renamed:" << track->pTrackModel->sName;
     }
 
     track->update();
     m_bDialogOpen = false;
-    qDebug() << "Dialog closed";
+    qDebug() << "...closed";
 }
 
 
@@ -748,12 +748,9 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
         // Selected option = Remove Track
         if ( QString::compare(selectedItem->text(), tr("Remove Track")) == 0 )
         {
-            // Show remove track dialog
-            RemoveTrackDialog* removeDialog = new RemoveTrackDialog( hoverTrack->pTrackModel->sName, this );
-            if ( removeDialog->exec() > 0 )
-            {
+            // Ask for confirmation
+            if ( QMessageBox::question(this, "Remove Track", "Are you sure you want to remove this track?" ) == QMessageBox::Yes )
                 removeTrack( hoverTrack );
-            }
         }
     }
 }
