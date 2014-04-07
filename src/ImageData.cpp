@@ -175,16 +175,16 @@ QString ImageData::getSqlStringFromQuery( QueryMap queryMap, bool forceUnused )
             sqlQuery += "YEAR='"        + queryMap.take(YEAR).toString()        + "' ";
 
         else if ( queryMap.contains(SIZE) )
-            sqlQuery += "SIZE="         + QString::number( queryMap.take(SIZE).toInt() );
+            sqlQuery += "SIZE="         + QString::number( queryMap.take(SIZE).toInt() ) + " ";
 
         else if ( queryMap.contains(BROKEN) )
-            sqlQuery += "BROKEN="       + QString::number( boolToInt( queryMap.take(BROKEN).toBool() ) );
+            sqlQuery += "BROKEN="       + QString::number( boolToInt( queryMap.take(BROKEN).toBool() ) ) + " ";
 
         else if ( queryMap.contains(MISSING) )
-            sqlQuery += "MISSING="      + QString::number( boolToInt( queryMap.take(MISSING).toBool() ) );
+            sqlQuery += "MISSING="      + QString::number( boolToInt( queryMap.take(MISSING).toBool() ) ) + " ";
 
         else if ( queryMap.contains(BATTERIES) )
-            sqlQuery += "BATTERIES="    + QString::number( boolToInt( queryMap.take(BATTERIES).toBool() ) );
+            sqlQuery += "BATTERIES="    + QString::number( boolToInt( queryMap.take(BATTERIES).toBool() ) ) + " ";
 
         if ( queryMap.size() >= 1 && multiQuery )
             sqlQuery += "AND ";
