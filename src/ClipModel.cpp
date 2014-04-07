@@ -91,6 +91,54 @@ QueryMap ClipModel::getImageQuery()
     return query;
 }
 
+QString ClipModel::getStatusMessage()
+{
+    QueryMap queryMap   = getImageQuery();
+    QString message     = "";
+
+    bool multiQuery = queryMap.size() > 1;
+    while ( queryMap.size() > 0 )
+    {
+        if ( message.length() > 99 )
+        {
+            message += "...";
+            break;
+        }
+
+        if      ( queryMap.contains(CATEGORY) )
+            message += "Category: '"     + queryMap.take(CATEGORY).toString()    + "' ";
+
+        else if ( queryMap.contains(SUBCATEGORY) )
+            message += "Sub-Category: '" + queryMap.take(SUBCATEGORY).toString() + "' ";
+
+        else if ( queryMap.contains(COLOR) )
+            message += "Color: "         + queryMap.take(COLOR).toString().toLower();
+
+        else if ( queryMap.contains(YEAR) )
+            message += "Year: "          + queryMap.take(YEAR).toString();
+
+        else if ( queryMap.contains(SIZE) )
+            message += "Size: "          + QString::number( queryMap.take(SIZE).toInt() );
+
+        else if ( queryMap.contains(BROKEN) )
+            message += "Broken: "        + queryMap.take(BROKEN).toString().toLower();
+
+        else if ( queryMap.contains(MISSING) )
+            message += "Missing: "       + queryMap.take(MISSING).toString().toLower();
+
+        else if ( queryMap.contains(BATTERIES) )
+            message += "Batteries: "     + queryMap.take(BATTERIES).toString().toLower();
+
+        if ( queryMap.size() >= 1 && multiQuery )
+            message += ",  ";
+    }
+
+    if ( message.length() <= 0 )
+        return "Any";
+    else
+        return message;
+}
+
 int ClipModel::getFrameFrom16th( int note16th, float bpm, float fps )
 {
     float seconds = (float)note16th * (15.0f / bpm);

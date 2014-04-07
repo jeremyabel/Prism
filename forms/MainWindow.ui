@@ -110,7 +110,7 @@
     <addaction name="actionImport"/>
     <addaction name="actionExport"/>
     <addaction name="separator"/>
-    <addaction name="actionQuit"/>
+    <addaction name="quit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -127,7 +127,16 @@
    <addaction name="menuEdit"/>
    <addaction name="menuTrack"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="contextMenuPolicy">
+    <enum>Qt::NoContextMenu</enum>
+   </property>
+  </widget>
   <action name="actionNew">
    <property name="text">
     <string>New</string>
@@ -168,7 +177,7 @@
     <string>Ctrl+E</string>
    </property>
   </action>
-  <action name="actionQuit">
+  <action name="quit">
    <property name="text">
     <string>Quit</string>
    </property>

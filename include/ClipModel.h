@@ -15,6 +15,7 @@ public:
 
     QJsonObject     serializeToJson();
     QueryMap        getImageQuery();
+    QString         getStatusMessage();
 
     static int      getFrameFrom16th( int note16th, float bpm, float fps );
 

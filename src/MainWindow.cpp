@@ -61,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                     addTrack( loadedTracks[i] );
 
                 m_bModified = false;
+
+                ui->statusBar->showMessage("Loaded " + QString::number(loadedTracks.size()) + " track(s) " + "from " + m_sCurrentPath + ".", 10000 );
             }
             else
             {
@@ -82,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // Add one new track
         TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
         addTrack( pTrackModel );
+
+        ui->statusBar->showMessage("");
     }
 
     on_timeZoomSlider_valueChanged( 500 );
@@ -122,6 +126,8 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
 void MainWindow::addTrack( TrackModel *trackModel )
 {
     m_bModified = true;
+
+    ui->statusBar->showMessage( "Added track '" + trackModel->sName + "'", 2500 );
     qDebug() << "Adding track" << trackModel->sName;
 
     int s = m_pTrackItems.size();
@@ -150,6 +156,8 @@ void MainWindow::addTrack( TrackModel *trackModel )
 void MainWindow::removeTrack( TrackItem *track )
 {
     m_bModified = true;
+
+    ui->statusBar->showMessage( "Removed track '" + track->pTrackModel->sName + "'", 2500 );
     qDebug() << "Removing track" << track->pTrackModel->sName;
 
     // Remove and clean up child clips
@@ -223,6 +231,11 @@ void MainWindow::on_timelineClipGrabbed( ClipItem *clip )
     m_pDraggingClip = clip;
     connect( m_pDraggingClip, SIGNAL(xChanged()), SLOT(on_timelineClipMoved()) );
     connect( m_pDraggingClip, SIGNAL(yChanged()), SLOT(on_timelineClipMoved()) );
+
+    // Show status message
+    int matches  = m_pImageData->makeQuery(clip->pClipModel->getImageQuery()).size();
+    QString imgs = (matches != 1 ? " images: " : " image: ");
+    ui->statusBar->showMessage( "Matches " + QString::number(matches) + imgs + clip->pClipModel->getStatusMessage() );
 
     // Lock clips to their current track if we've selected multiple things
     for ( int i = 0; i < m_pScene->selectedItems().length(); i++ )
@@ -316,6 +329,13 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
         qDebug() << "Restoring...";
         m_bModified = false;
         *clip->pClipModel = origClip;
+    }
+    else
+    {
+        // Update status bar
+        int matches  = m_pImageData->makeQuery(clip->pClipModel->getImageQuery()).size();
+        QString imgs = (matches != 1 ? " images: " : " image: ");
+        ui->statusBar->showMessage( "Matches " + QString::number(matches) + imgs + clip->pClipModel->getStatusMessage() );
     }
 
     m_bDialogOpen = false;
@@ -569,7 +589,7 @@ void MainWindow::on_actionSave_As_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("path", m_sCurrentPath);
 
-        // TODO: Notify in status bar?
+        ui->statusBar->showMessage( "Saved successfully", 2500 );
     }
     else
     {
@@ -601,7 +621,7 @@ void MainWindow::on_actionImport_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("categoryPath", m_sCategoryPath);
 
-        // TODO: Notify in status bar?
+        ui->statusBar->showMessage( "Saved successfully", 2500 );
     }
     else
     {
@@ -656,7 +676,14 @@ void MainWindow::on_actionExport_triggered()
     settings.setValue( "exportPath", QVariant(path) );
 
     // Export!
-    FileManager::exportToXML(path, &trackModels, m_pCategoryData, m_pImageData, exportDialog->bpm, exportDialog->fps);
+    if ( FileManager::exportToXML(path, &trackModels, m_pCategoryData, m_pImageData, exportDialog->bpm, exportDialog->fps) )
+    {
+        ui->statusBar->showMessage( "Exported successfully", 2500 );
+    }
+    else
+    {
+        // TODO: Show error
+    }
 }
 
 
@@ -680,7 +707,7 @@ void MainWindow::on_actionAdd_Track_triggered()
         // Add track item
         TrackItem* item = m_pTrackItems.last();
         item->setX( m_pScene->sceneRect().left() + 1 );
-        item->setY( m_pTimeline->boundingRect().height() + ( (m_pTrackItems.length() - 1) * item->boundingRect().height() + 3 ) );
+        item->setY( m_pTimeline->boundingRect().height() + ( (m_pTrackItems.length() - 1) * item->boundingRect().height() + 2500 ) );
         m_pScene->addItem( item );
 
         // Draw horizontal divider
@@ -741,6 +768,7 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
             ClipModel* pClipModel = new ClipModel(nearest16th, 4);
             addClip( pClipModel, hoverTrack, true );
 
+            ui->statusBar->showMessage( "Clip added at " + QString::number(nearest16th), 2500 );
             qDebug() << "Adding clip at " << nearest16th;
             return;
         }
