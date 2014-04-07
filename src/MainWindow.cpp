@@ -83,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         m_pImageData    = new ImageData();
 
         // Add one new track
-        TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
+        TrackModel* pTrackModel = new TrackModel( "track 1", QColor(Qt::red) );
         addTrack( pTrackModel );
 
         ui->statusBar->showMessage("");
@@ -137,7 +137,6 @@ void MainWindow::addTrack( TrackModel *trackModel )
 
     // Add track item
     TrackItem* item = new TrackItem( trackModel );
-    item->setX( m_pScene->sceneRect().left() + iOffset );
     item->setY( m_pTimeline->boundingRect().height() + s * ( item->boundingRect().height() + iOffset ) );
 
     connect( item, SIGNAL( mouseDouble(TrackItem*) ), SLOT( on_trackDoubleClicked(TrackItem*) ) );
@@ -281,7 +280,7 @@ void MainWindow::on_timelineClipReleased()
 {
     m_bModified = true;
 
-    TrackItem* targetTrackItem = (TrackItem*)m_pDraggingClip->parentObject();
+    TrackItem* targetTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
 
     if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
         return;
@@ -716,7 +715,7 @@ void MainWindow::on_actionAdd_Track_triggered()
 
     // Show dialog
     QString defaultName = tr("track ") + QString::number(m_pTrackItems.size() + 1);
-    AddTrackDialog* pAddDialog = new AddTrackDialog( defaultName, this );
+    AddTrackDialog* pAddDialog = new AddTrackDialog( defaultName, m_pTrackItems.size(), this );
 
     // Check results
     if ( pAddDialog->exec() > 0 )
@@ -724,19 +723,8 @@ void MainWindow::on_actionAdd_Track_triggered()
         qDebug() << "Adding track" << pAddDialog->newNameString;
 
         // Create new track item + graphics
-        TrackModel* pTrackModel = new TrackModel( pAddDialog->newNameString, QColor( Qt::yellow ) );
-        m_pTrackItems.append( new TrackItem( pTrackModel ) );
-
-        // Add track item
-        TrackItem* item = m_pTrackItems.last();
-        item->setX( m_pScene->sceneRect().left() + 1 );
-        item->setY( m_pTimeline->boundingRect().height() + ( (m_pTrackItems.length() - 1) * item->boundingRect().height() + 2500 ) );
-        m_pScene->addItem( item );
-
-        // Draw horizontal divider
-        float fYPos  = item->pos().y() + item->boundingRect().height();
-        float fWidth = m_pTimeline->boundingRect().width();
-        m_pScene->addLine( 0, fYPos, fWidth, fYPos, QPen( QColor(45, 45, 45) ) );
+        TrackModel* pTrackModel = new TrackModel( pAddDialog->newNameString, pAddDialog->color );
+        addTrack( pTrackModel );
     }
 }
 
@@ -754,7 +742,7 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
 
     QMenu contextMenu;
     contextMenu.addAction( "Add Clip" );
-    contextMenu.addAction( "Remove Track" );
+    contextMenu.addAction( "Remove Track" )->setDisabled( m_pTrackItems.size() <= 1 );
 
     TrackItem* hoverTrack = NULL;
 

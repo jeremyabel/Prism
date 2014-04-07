@@ -44,18 +44,24 @@ void ClipItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     // Draw clip rect
     painter->setPen( QPen( Qt::NoPen ) );
-    painter->setBrush( QBrush( color.darker(isSelected() ? 100 : 140) ) );
+    painter->setBrush( QBrush( color.darker( isSelected() ? 100 : 130 ) ) );
     painter->drawRect( QRect( 0, 0, m_fWidth - 1, TRACK_HEIGHT ) );
 
-    // Draw right dividing line
+    // Draw left dividing line
     painter->setBrush( Qt::NoBrush );
-    painter->setPen( color.darker() );
+    painter->setPen( color.darker( isSelected() ? 100 : 140 ) );
+    painter->drawLine( 0, 0, 0, TRACK_HEIGHT - 1 );
+
+    // Draw right dividing line
+    painter->setPen( color.darker( isSelected() ? 140 : 400 ) );
     painter->drawLine( m_fWidth - 1, 0, m_fWidth - 1, TRACK_HEIGHT - 1 );
+    painter->setPen( color.darker(isSelected() ? 100 : 120 ) );
+    painter->drawLine( m_fWidth - 2, 0, m_fWidth - 2, TRACK_HEIGHT - 1 );
 
     // Draw divisions if we're long enough
     if ( pClipModel->length16th + 1 > 16 / pClipModel->distro16th && pClipModel->distro16th <= m_iDivisions )
     {
-        painter->setPen( color.darker(isSelected() ? 150 : 200) );
+        painter->setPen( color.lighter(isSelected() ? 140 : 130) );
 
         for ( int i = 1; i < pClipModel->length16th / (16 / pClipModel->distro16th); i++ )
         {
