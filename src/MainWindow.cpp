@@ -433,12 +433,11 @@ bool MainWindow::releaseModifiedFile()
         msgBox.setStandardButtons( QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel );
         msgBox.setDefaultButton( QMessageBox::Save );
 
-        int result = msgBox.exec();
-        switch ( result )
+        switch ( msgBox.exec() )
         {
             case QMessageBox::Save:
                 qDebug() << "...save";
-                // TODO: IMPLEMENT
+                on_actionSave_triggered();
                 break;
             case QMessageBox::Discard:
                 qDebug() << "...discard";
