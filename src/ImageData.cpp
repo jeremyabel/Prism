@@ -175,7 +175,7 @@ QString ImageData::getSqlStringFromQuery( QueryMap queryMap, bool forceUnused )
             sqlQuery += "YEAR='"        + queryMap.take(YEAR).toString()        + "' ";
 
         else if ( queryMap.contains(SIZE) )
-            sqlQuery += "SIZE="         + QString::number( boolToInt( queryMap.take(SIZE).toBool() ) );
+            sqlQuery += "SIZE="         + QString::number( queryMap.take(SIZE).toInt() );
 
         else if ( queryMap.contains(BROKEN) )
             sqlQuery += "BROKEN="       + QString::number( boolToInt( queryMap.take(BROKEN).toBool() ) );
