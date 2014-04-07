@@ -36,10 +36,13 @@ typedef QMap<ParameterType, QVariant>   QueryMap;
 class ImageData
 {
 public:
-    void initWithJson( QJsonObject jsonObject );
-    void close();
+    void                initWithJson( QJsonObject jsonObject );
+    void                setImageUsedState( ImageModel targetImage, bool used );
+    void                setQueryAsUnused( QueryMap query );
+    void                close();
 
-    QList<ImageModel> makeQuery( QueryMap queryMap );
+    QString             getSqlStringFromQuery( QueryMap queryMap, bool forceUnused = false );
+    QList<ImageModel>   makeQuery( QueryMap queryMap, bool forceUnused = false );
 
 private:
     int boolToInt( bool value ) const { return value ? 1 : 0; }

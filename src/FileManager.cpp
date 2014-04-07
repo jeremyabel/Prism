@@ -296,15 +296,21 @@ bool FileManager::exportToXML( QString path, QList<TrackModel *>* trackModels, c
                                             for ( int j = 0; j < trackModel->pClips.size(); j++ )
                                             {
                                                 ClipModel* clipModel        = trackModel->pClips.at(j);
-                                                QList<ImageModel> images    = imageData->makeQuery( clipModel->getImageQuery() );
+                                                QList<ImageModel> images    = imageData->makeQuery( clipModel->getImageQuery(), true );
                                                 int invDiv                  = 16 / clipModel->distro16th;
 
                                                 // One clip for each image
                                                 for ( int k = 0; k < clipModel->length16th / invDiv; k++ )
                                                 {
-                                                    // Select image to use
-                                                    // TODO: This is non-exhaustive!
-                                                    ImageModel imgModel = images.at(qrand() % images.size());
+                                                    // Mark all query images as unused if we've used them up already
+                                                    if ( images.size() <= 0 )
+                                                    {
+                                                        imageData->setQueryAsUnused( clipModel->getImageQuery() );
+                                                        images = imageData->makeQuery( clipModel->getImageQuery(), true );
+                                                    }
+
+                                                    ImageModel imgModel = images.takeAt(qrand() % images.size());
+                                                    imageData->setImageUsedState( imgModel, true );
 
                                                     int imgStart16th    = clipModel->starting16th + k * invDiv;
                                                     int imgEnd16th      = imgStart16th + invDiv;
