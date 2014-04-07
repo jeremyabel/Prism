@@ -336,6 +336,20 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
         int matches  = m_pImageData->makeQuery(clip->pClipModel->getImageQuery()).size();
         QString imgs = (matches != 1 ? " images: " : " image: ");
         ui->statusBar->showMessage( "Matches " + QString::number(matches) + imgs + clip->pClipModel->getStatusMessage() );
+
+        // Alert if query doesn't match enough images
+        if ( matches <= 1 )
+        {
+            QString matchString = "doens't match any images.";
+            if ( matches > 0)
+            {
+                matchString  = "matches only ";
+                matchString += QString::number(matches);
+                matchString += (matches != 1 ? " images." : " image.");
+            }
+
+            QMessageBox::warning( this, "Warning", "This clip " + matchString, QMessageBox::Ok );
+        }
     }
 
     m_bDialogOpen = false;
