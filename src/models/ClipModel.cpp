@@ -155,9 +155,9 @@ void ClipModel::setStarting16th( int value, bool force )
     ending16th   = starting16th + length16th;
 }
 
-void ClipModel::setEnding16th( int value )
+void ClipModel::setEnding16th( int value, bool force )
 {
-    if ( value <= starting16th )
+    if ( value <= starting16th && !force )
         return;
 
     ending16th = value;

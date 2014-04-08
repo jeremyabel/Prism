@@ -20,7 +20,7 @@ public:
     static int      getFrameFrom16th( int note16th, float bpm, float fps );
 
     void            setStarting16th( int value, bool force = false );
-    void            setEnding16th( int value );
+    void            setEnding16th(   int value, bool force = false );
 
     int             starting16th;
     int             length16th;

@@ -111,6 +111,7 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
     connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), SLOT( on_timelineClipDoubleClicked(ClipItem*) ) );
+    connect( clipItem, SIGNAL( resized(ClipItem*) ),     SLOT( on_timelineClipResized(ClipItem*) ) );
     connect( clipItem, SIGNAL( detached() ),             SLOT( on_timelineClipDetached() ) );
 
     clipItem->setParentItem( trackItem );
@@ -176,6 +177,7 @@ void MainWindow::removeTrack( TrackItem *track )
             disconnect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   0, 0 );
             disconnect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     0, 0 );
             disconnect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), 0, 0 );
+            disconnect( clipItem, SIGNAL( resized(ClipItem*) ),     0, 0 );
             disconnect( clipItem, SIGNAL( detached() ),             0, 0 );
 
             m_pClipItems.removeAt(m_pClipItems.indexOf(clipItem));
@@ -398,6 +400,13 @@ void MainWindow::on_timelineClipMoved()
            break;
        }
     }
+}
+
+
+void MainWindow::on_timelineClipResized( ClipItem *clip )
+{
+    // Add to undo stack
+    m_pUndoStack->push( new ResizeClipCommand(clip) );
 }
 
 

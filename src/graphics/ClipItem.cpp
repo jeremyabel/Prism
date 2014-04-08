@@ -108,8 +108,10 @@ void ClipItem::mousePressEvent( QGraphicsSceneMouseEvent *event )
     m_prevCursorPos  = QCursor::pos();
     bMoved = false;
 
-    m_clickStarting16ths = pClipModel->starting16th;
-    m_clickEnding16ths   = pClipModel->ending16th;
+    m_clickStarting16ths        = pClipModel->starting16th;
+    m_clickEnding16ths          = pClipModel->ending16th;
+    pClipModel->oldStarting16th = m_clickStarting16ths;
+    pClipModel->oldEnding16th   = m_clickEnding16ths;
 
     QGraphicsItem::mousePressEvent( event );
     emit mouseDown( this );
@@ -130,6 +132,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             if ( pClipModel->starting16th <= leftClip->ending16th )
             {
                 pClipModel->starting16th = leftClip->ending16th;
+                emit resized( this );
                 update();
                 return;
             }
@@ -141,6 +144,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             if ( pClipModel->ending16th >= rightClip->starting16th )
             {
                 pClipModel->ending16th = rightClip->starting16th;
+                emit resized( this );
                 update();
                 return;
             }
@@ -154,6 +158,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
         {
             // Drag right side
             pClipModel->setEnding16th( m_clickEnding16ths + delta16ths );
+            emit resized( this );
         }
         else if ( pClipModel->length16th >= 1 && m_fWidth > TRACK_DRAG_MIN_WIDTH )
         {
@@ -161,6 +166,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             snapTo16ths( QCursor::pos().x() );
             pClipModel->setEnding16th( m_clickEnding16ths );
             setX( calculateXPos() );
+            emit resized( this );
         }
 
         update();
@@ -207,13 +213,13 @@ void ClipItem::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
     {
         snapTo16ths( QCursor::pos().x() );
         setPos( calculateXPos(), 0 );
-    }
+    }        
 
     // Notify and reset
     emit mouseUp( this );
-    bLocked        = false;
-    m_bExtendLeft  = false;
-    m_bExtendRight = false;
+    bLocked         = false;
+    m_bExtendLeft   = false;
+    m_bExtendRight  = false;
 }
 
 

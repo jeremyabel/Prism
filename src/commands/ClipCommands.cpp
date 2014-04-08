@@ -4,6 +4,7 @@
 #include "ClipCommands.h"
 
 
+
 MoveClipCommand::MoveClipCommand( ClipItem *clipItem, TrackItem* newTrackItem, QUndoCommandPrivate *parent )
 {
     Q_UNUSED(parent);
@@ -43,6 +44,56 @@ void MoveClipCommand::redo()
     m_pNewTrackItem->pTrackModel->insert( m_pClipItem->pClipModel );
 }
 
-    m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th );
-    m_pClipItem->setParent( m_pNewTrackItem );
+bool MoveClipCommand::mergeWith( const QUndoCommand *command )
+{
+    const MoveClipCommand *moveCommand = static_cast<const MoveClipCommand*>(command);
+    ClipItem* clipItem = moveCommand->m_pClipItem;
+
+    if ( m_pClipItem != clipItem )
+        return false;
+
+    m_iNewStarting16th = clipItem->pClipModel->starting16th;
+    return true;
+}
+
+
+
+ResizeClipCommand::ResizeClipCommand( ClipItem *clipItem, QUndoCommandPrivate *parent )
+{
+    Q_UNUSED(parent);
+
+    m_pClipItem         = clipItem;
+    m_iOldStarting16th  = clipItem->pClipModel->oldStarting16th;
+    m_iOldEnding16th    = clipItem->pClipModel->oldEnding16th;
+    m_iNewStarting16th  = clipItem->pClipModel->starting16th;
+    m_iNewEnding16th    = clipItem->pClipModel->ending16th;
+}
+
+void ResizeClipCommand::undo()
+{
+    qDebug() << "ResizeClipCommand: undo";
+
+    m_pClipItem->pClipModel->setStarting16th( m_iOldStarting16th, true );
+    m_pClipItem->pClipModel->setEnding16th( m_iOldEnding16th, true );
+    m_pClipItem->setX( m_pClipItem->calculateXPos() );
+}
+
+void ResizeClipCommand::redo()
+{
+    m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th, true );
+    m_pClipItem->pClipModel->setEnding16th( m_iNewEnding16th );
+    m_pClipItem->setX( m_pClipItem->calculateXPos() );
+}
+
+bool ResizeClipCommand::mergeWith( const QUndoCommand *command )
+{
+    const MoveClipCommand *moveCommand = static_cast<const MoveClipCommand*>(command);
+    ClipItem* clipItem = moveCommand->m_pClipItem;
+
+    if ( m_pClipItem != clipItem )
+        return false;
+
+    m_iNewStarting16th  = clipItem->pClipModel->starting16th;
+    m_iNewEnding16th    = clipItem->pClipModel->ending16th;
+    return true;
 }

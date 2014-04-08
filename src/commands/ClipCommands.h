@@ -6,14 +6,6 @@
 #include "ClipItem.h"
 #include "TrackItem.h"
 
-class AddClipCommand : public QUndoCommand
-{
-public:
-
-private:
-    ClipItem*   m_pClipItem;
-};
-
 
 class EditClipCommand : public QUndoCommand
 {
@@ -22,6 +14,7 @@ public:
 private:
     ClipItem*   m_pClipItem;
 };
+
 
 
 class RemoveClipCommand : public QUndoCommand
@@ -33,20 +26,49 @@ private:
 };
 
 
+
 class MoveClipCommand : public QUndoCommand
 {
 public:
+    enum { Id = 1 };
+
     MoveClipCommand( ClipItem* clipItem, TrackItem* newTrackItem, QUndoCommandPrivate* parent = 0 );
 
     void undo();
     void redo();
+    bool mergeWith( const QUndoCommand* command );
+    int id() const { return Id; }
+
+    ClipItem*   m_pClipItem;
 
 private:
-    ClipItem*   m_pClipItem;
     TrackItem*  m_pOldTrackItem;
     TrackItem*  m_pNewTrackItem;
     int         m_iOldStarting16th;
     int         m_iNewStarting16th;
+
+};
+
+
+
+class ResizeClipCommand : public QUndoCommand
+{
+public:
+    enum { Id = 2 };
+
+    ResizeClipCommand( ClipItem* clipItem, QUndoCommandPrivate* parent = 0 );
+
+    void undo();
+    void redo();
+    bool mergeWith( const QUndoCommand* command );
+    int id() const { return Id; }
+
+private:
+    ClipItem*   m_pClipItem;
+    int         m_iOldStarting16th;
+    int         m_iNewStarting16th;
+    int         m_iOldEnding16th;
+    int         m_iNewEnding16th;
 
 };
 
