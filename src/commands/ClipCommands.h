@@ -27,6 +27,14 @@ private:
 class RemoveClipCommand : public QUndoCommand
 {
 public:
+    enum { Id = 3 };
+
+    RemoveClipCommand( ClipItem* clipItem, QUndoCommandPrivate* parent = 0 );
+
+    void undo();
+    void redo();
+    bool mergeWith( const QUndoCommand* command );
+    int  id() const { return Id; }
 
 private:
     ClipItem*   m_pClipItem;
@@ -44,7 +52,7 @@ public:
     void undo();
     void redo();
     bool mergeWith( const QUndoCommand* command );
-    int id() const { return Id; }
+    int  id() const { return Id; }
 
     ClipItem*   m_pClipItem;
 
@@ -53,7 +61,6 @@ private:
     TrackItem*  m_pNewTrackItem;
     int         m_iOldStarting16th;
     int         m_iNewStarting16th;
-
 };
 
 
@@ -68,7 +75,7 @@ public:
     void undo();
     void redo();
     bool mergeWith( const QUndoCommand* command );
-    int id() const { return Id; }
+    int  id() const { return Id; }
 
 private:
     ClipItem*   m_pClipItem;
@@ -76,7 +83,6 @@ private:
     int         m_iNewStarting16th;
     int         m_iOldEnding16th;
     int         m_iNewEnding16th;
-
 };
 
 #endif // CLIPCOMMANDS_H

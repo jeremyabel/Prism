@@ -521,6 +521,9 @@ bool MainWindow::releaseModifiedFile()
         }
     }
 
+    // Clear undo stack
+    m_pUndoStack->clear();
+
     return true;
 }
 
