@@ -41,6 +41,7 @@ signals:
     void            mouseDown(   ClipItem* clip );
     void            mouseUp(     ClipItem* clip );
     void            mouseDouble( ClipItem* clip );
+    void            resized(     ClipItem* clip );
     void            detached();
 
 protected:

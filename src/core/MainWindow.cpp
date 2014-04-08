@@ -287,31 +287,26 @@ void MainWindow::on_timelineClipReleased( ClipItem* clip )
 
     TrackItem* targetTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
 
+    // Track mouse
+    if ( m_pDraggingClip->bDetached )
+        m_pDraggingClip->pClipModel->setStarting16th( getNearest16th(), true );
+
     // Keep reference for undo stack
     if ( m_pDraggingClip->parentObject() )
         clip->pPrevTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
 
+    // Don't do anything if we don't need to
     if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
         return;
 
-    // Remove from old parent track
-    if ( !m_pDraggingClip->bDetached && targetTrackItem != NULL )
-        targetTrackItem->pTrackModel->remove( m_pDraggingClip->pClipModel );
-`
     // If we're not hovering over a track, go back to the original track
     if ( m_pHoverTrack != NULL )
         targetTrackItem = m_pHoverTrack;
     else
         targetTrackItem = m_pOriginalTrack;
 
-    // Reassign parent
-    m_pDraggingClip->setParentItem( targetTrackItem );
-
-    // Add undo command
-    m_pUndoStack->push( new MoveClipCommand(clip) );
-
-    // Insert into new parent track
-    targetTrackItem->pTrackModel->insert( m_pDraggingClip->pClipModel );
+    // Execute command and push to undo stack
+    m_pUndoStack->push( new MoveClipCommand(clip, targetTrackItem) );
 
     // Clean up
     disconnect( m_pDraggingClip, SIGNAL(xChanged()), 0, 0 );

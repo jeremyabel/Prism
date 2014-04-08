@@ -4,7 +4,7 @@
 #include "ClipCommands.h"
 
 
-MoveClipCommand::MoveClipCommand( ClipItem *clipItem, QUndoCommandPrivate *parent )
+MoveClipCommand::MoveClipCommand( ClipItem *clipItem, TrackItem* newTrackItem, QUndoCommandPrivate *parent )
 {
     Q_UNUSED(parent);
 
@@ -12,7 +12,7 @@ MoveClipCommand::MoveClipCommand( ClipItem *clipItem, QUndoCommandPrivate *paren
     m_iOldStarting16th  = clipItem->pClipModel->oldStarting16th;
     m_pOldTrackItem     = clipItem->pPrevTrackItem;
     m_iNewStarting16th  = clipItem->pClipModel->starting16th;
-    m_pNewTrackItem     = static_cast<TrackItem*>(clipItem->parentItem());
+    m_pNewTrackItem     = newTrackItem;
 }
 
 void MoveClipCommand::undo()
@@ -31,6 +31,18 @@ void MoveClipCommand::undo()
 
 void MoveClipCommand::redo()
 {
+    qDebug() << "MoveClipCommand";
+
+    m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th );
+
+    // Remove from old track
+    m_pOldTrackItem->pTrackModel->remove( m_pClipItem->pClipModel );
+
+    // Insert into new track
+    m_pClipItem->setParentItem( m_pNewTrackItem );
+    m_pNewTrackItem->pTrackModel->insert( m_pClipItem->pClipModel );
+}
+
     m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th );
     m_pClipItem->setParent( m_pNewTrackItem );
 }

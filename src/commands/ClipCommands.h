@@ -36,7 +36,7 @@ private:
 class MoveClipCommand : public QUndoCommand
 {
 public:
-    MoveClipCommand( ClipItem* clipItem, QUndoCommandPrivate* parent = 0 );
+    MoveClipCommand( ClipItem* clipItem, TrackItem* newTrackItem, QUndoCommandPrivate* parent = 0 );
 
     void undo();
     void redo();
