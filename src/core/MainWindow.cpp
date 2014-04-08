@@ -35,6 +35,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->setupUi(this);
 
+    addAction( ui->actionNew );
+    addAction( ui->actionOpen );
+    addAction( ui->actionSave );
+    addAction( ui->actionSave_As );
+    addAction( ui->actionImport );
+    addAction( ui->actionExport );
+    addAction( ui->quit );
+    addAction( ui->actionUndo );
+    addAction( ui->actionRedo );
+    addAction( ui->actionCopy_Clip );
+    addAction( ui->actionPaste_Clip );
+    addAction( ui->actionAdd_Track );
+
     m_pScene = new QGraphicsScene( this );
     ui->graphicsView->setScene( m_pScene );
 
