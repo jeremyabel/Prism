@@ -11,6 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = Prism
 TEMPLATE = app
 INCLUDEPATH += src/core \
+	       src/commands \
 	       src/data \
 	       src/dialogs \
 	       src/graphics \
@@ -29,7 +30,9 @@ SOURCES +=  src/main.cpp \
 	    src/dialogs/ExportDialog.cpp \
 	    src/data/ImageData.cpp \
 	    thirdparty/sqlite3/sqlite3.c \
-	    src/models/ClipModel.cpp
+	    src/models/ClipModel.cpp \
+	    src/commands/TrackCommands.cpp \
+	    src/commands/ClipCommands.cpp
 
 HEADERS  += src/graphics/ClipItem.h \
 	    src/graphics/TrackItem.h \
@@ -43,9 +46,11 @@ HEADERS  += src/graphics/ClipItem.h \
 	    src/data/CategoryData.h \
 	    src/dialogs/ExportDialog.h \
 	    src/data/ImageData.h \
-	    thirdparty/sqlite3/sqlite3.h
+	    thirdparty/sqlite3/sqlite3.h \
+	    src/commands/TrackCommands.h \
+	    src/commands/ClipCommands.h
 
 FORMS    += forms/MainWindow.ui \
-    forms/ClipParamDialog.ui \
-    forms/AddTrackDialog.ui \
-    forms/ExportDialog.ui
+	    forms/ClipParamDialog.ui \
+	    forms/AddTrackDialog.ui \
+	    forms/ExportDialog.ui

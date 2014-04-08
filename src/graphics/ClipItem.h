@@ -8,8 +8,11 @@
 #include <QRectF>
 
 #include "ClipModel.h"
+#include "TrackItem.h"
 #include "TrackModel.h"
 #include "ui_ClipParamDialog.h"
+
+class TrackItem;
 
 class ClipItem : public QGraphicsObject
 {
@@ -30,6 +33,7 @@ public:
     bool            bMultiSelected;
     QColor          color;
     ClipModel*      pClipModel;
+    TrackItem*      pPrevTrackItem;
     ClipItem*       pMasterClipItem;
     int             masterInitStarting16ths;
 

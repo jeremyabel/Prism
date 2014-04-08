@@ -13,6 +13,7 @@
 
 #include "AddTrackDialog.h"
 #include "ClipParamDialog.h"
+#include "ClipCommands.h"
 #include "ExportDialog.h"
 #include "FileManager.h"
 #include "MainWindow.h"
@@ -30,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     m_bModified     = false;
     m_sCurrentPath  = "";
     m_sCategoryPath = "";
+    m_pUndoStack    = new QUndoStack(this);
 
     ui->setupUi(this);
 
@@ -107,7 +109,7 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
 
     ClipItem* clipItem = new ClipItem( clipModel );
     connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
-    connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased() ) );
+    connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), SLOT( on_timelineClipDoubleClicked(ClipItem*) ) );
     connect( clipItem, SIGNAL( detached() ),             SLOT( on_timelineClipDetached() ) );
 
@@ -230,6 +232,8 @@ void MainWindow::on_timeZoomSlider_valueChanged(int value)
 void MainWindow::on_timelineClipGrabbed( ClipItem *clip )
 {
     m_pDraggingClip = clip;
+    m_pDraggingClip->pClipModel->oldStarting16th = m_pDraggingClip->pClipModel->starting16th;
+
     connect( m_pDraggingClip, SIGNAL(xChanged()), SLOT(on_timelineClipMoved()) );
     connect( m_pDraggingClip, SIGNAL(yChanged()), SLOT(on_timelineClipMoved()) );
 
@@ -259,8 +263,6 @@ void MainWindow::on_timelineClipGrabbed( ClipItem *clip )
             pClip->bMultiSelected = false;
         }
     }
-
-    //m_pUndoStack->push( new MoveCommand( m_pDraggingClip, ));
 }
 
 
@@ -274,15 +276,20 @@ void MainWindow::on_timelineClipDetached()
 
     // Clear parent
     m_pDraggingClip->setY( ui->graphicsView->mapFromGlobal( QCursor::pos() ).y() - ( m_pDraggingClip->boundingRect().height() / 2 ) );
+    m_pDraggingClip->pPrevTrackItem = targetTrackItem;
     m_pDraggingClip->setParentItem( 0 );
 }
 
 
-void MainWindow::on_timelineClipReleased()
+void MainWindow::on_timelineClipReleased( ClipItem* clip )
 {
     m_bModified = true;
 
     TrackItem* targetTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
+
+    // Keep reference for undo stack
+    if ( m_pDraggingClip->parentObject() )
+        clip->pPrevTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
 
     if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
         return;
@@ -290,7 +297,7 @@ void MainWindow::on_timelineClipReleased()
     // Remove from old parent track
     if ( !m_pDraggingClip->bDetached && targetTrackItem != NULL )
         targetTrackItem->pTrackModel->remove( m_pDraggingClip->pClipModel );
-
+`
     // If we're not hovering over a track, go back to the original track
     if ( m_pHoverTrack != NULL )
         targetTrackItem = m_pHoverTrack;
@@ -299,6 +306,9 @@ void MainWindow::on_timelineClipReleased()
 
     // Reassign parent
     m_pDraggingClip->setParentItem( targetTrackItem );
+
+    // Add undo command
+    m_pUndoStack->push( new MoveClipCommand(clip) );
 
     // Insert into new parent track
     targetTrackItem->pTrackModel->insert( m_pDraggingClip->pClipModel );
@@ -797,4 +807,14 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
                 removeTrack( hoverTrack );
         }
     }
+}
+
+void MainWindow::on_actionUndo_triggered()
+{
+    m_pUndoStack->undo();
+    m_pScene->update();
+
+    // Redraw tracks
+    for ( int i = 0; i < m_pTrackItems.length(); i++ )
+        m_pTrackItems[i]->update();
 }

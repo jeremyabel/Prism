@@ -26,6 +26,8 @@ public:
     int             length16th;
     int             ending16th;
     int             distro16th;
+    int             oldStarting16th;
+    int             oldEnding16th;
 
     bool            enableCategory;
     bool            enableSubCategory;

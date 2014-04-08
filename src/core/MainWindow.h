@@ -34,7 +34,7 @@ public:
 private slots:
     void                    on_timeZoomSlider_valueChanged( int value );
     void                    on_timelineClipGrabbed( ClipItem* clip );
-    void                    on_timelineClipReleased();
+    void                    on_timelineClipReleased( ClipItem* clip );
     void                    on_timelineClipDoubleClicked( ClipItem* clip );
     void                    on_timelineClipMoved();
     void                    on_timelineClipDetached();
@@ -49,6 +49,8 @@ private slots:
     void                    on_actionAdd_Track_triggered();
 
     void                    on_graphicsView_customContextMenuRequested( const QPoint &pos );
+
+    void on_actionUndo_triggered();
 
 private:
     bool                    releaseModifiedFile();
