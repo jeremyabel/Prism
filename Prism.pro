@@ -10,36 +10,40 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Prism
 TEMPLATE = app
-INCLUDEPATH += include
+INCLUDEPATH += include \
+	       src/data \
+	       src/dialogs \
+	       src/graphics \
+	       src/models \
 
-SOURCES += src/main.cpp\
-    src/ClipItem.cpp \
-    src/MainWindow.cpp \
-    src/TrackItem.cpp \
-    src/ClipParamDialog.cpp \
-    src/TimelineItem.cpp \
-    src/TrackModel.cpp \
-    src/AddTrackDialog.cpp \
-    src/FileManager.cpp \
-    src/CategoryData.cpp \
-    src/ExportDialog.cpp \
-    src/ImageData.cpp \
-    thirdparty/sqlite3/sqlite3.c \
-    src/ClipModel.cpp
+SOURCES +=  src/main.cpp \
+	    src/graphics/ClipItem.cpp \
+	    src/MainWindow.cpp \
+	    src/graphics/TrackItem.cpp \
+	    src/dialogs/ClipParamDialog.cpp \
+	    src/graphics/TimelineItem.cpp \
+	    src/models/TrackModel.cpp \
+	    src/dialogs/AddTrackDialog.cpp \
+	    src/FileManager.cpp \
+	    src/data/CategoryData.cpp \
+	    src/dialogs/ExportDialog.cpp \
+	    src/data/ImageData.cpp \
+	    thirdparty/sqlite3/sqlite3.c \
+	    src/models/ClipModel.cpp
 
-HEADERS  += include/ClipItem.h \
-    include/TrackItem.h \
-    include/ClipParamDialog.h \
-    include/MainWindow.h \
-    include/ClipModel.h \
-    include/TimelineItem.h \
-    include/TrackModel.h \
-    include/AddTrackDialog.h \
-    include/FileManager.h \
-    include/CategoryData.h \
-    include/ExportDialog.h \
-    include/ImageData.h \
-    thirdparty/sqlite3/sqlite3.h
+HEADERS  += src/graphics/ClipItem.h \
+	    src/graphics/TrackItem.h \
+	    src/dialogs/ClipParamDialog.h \
+	    include/MainWindow.h \
+	    src/models/ClipModel.h \
+	    src/graphics/TimelineItem.h \
+	    src/models/TrackModel.h \
+	    src/dialogs/AddTrackDialog.h \
+	    include/FileManager.h \
+	    src/data/CategoryData.h \
+	    src/dialogs/ExportDialog.h \
+	    src/data/ImageData.h \
+	    thirdparty/sqlite3/sqlite3.h
 
 FORMS    += forms/MainWindow.ui \
     forms/ClipParamDialog.ui \

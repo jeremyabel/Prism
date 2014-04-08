@@ -259,6 +259,8 @@ void MainWindow::on_timelineClipGrabbed( ClipItem *clip )
             pClip->bMultiSelected = false;
         }
     }
+
+    //m_pUndoStack->push( new MoveCommand( m_pDraggingClip, ));
 }
 
 
@@ -367,6 +369,9 @@ void MainWindow::on_timelineClipMoved()
     // Redraw tracks
     for ( int i = 0; i < m_pTrackItems.length(); i++ )
         m_pTrackItems[i]->update();
+
+    if ( !m_pDraggingClip )
+        return;
 
     // Set clip y to cursor y
     if ( m_pDraggingClip->bDetached )

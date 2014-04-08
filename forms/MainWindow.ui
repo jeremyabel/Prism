@@ -116,6 +116,8 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionCopy_Clip"/>
+    <addaction name="actionPaste_Clip"/>
    </widget>
    <widget class="QMenu" name="menuTrack">
     <property name="title">
@@ -193,6 +195,22 @@
   <action name="actionImport">
    <property name="text">
     <string>Import...</string>
+   </property>
+  </action>
+  <action name="actionCopy_Clip">
+   <property name="text">
+    <string>Copy Clip</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste_Clip">
+   <property name="text">
+    <string>Paste Clip</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,9 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QList>
+#include <QUndoStack>
+#include <QUndoView>
+#include <QAction>
 
 #include "CategoryData.h"
 #include "ClipModel.h"
@@ -65,6 +68,9 @@ private:
     TrackItem*              m_pHoverTrack;
     CategoryData*           m_pCategoryData;
     ImageData*              m_pImageData;
+
+    QUndoStack*             m_pUndoStack;
+    QUndoView*              m_pUndoView;
 
     QString                 m_sCurrentPath;
     QString                 m_sCategoryPath;
