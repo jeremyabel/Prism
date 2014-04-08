@@ -342,6 +342,9 @@ void MainWindow::on_timelineClipDoubleClicked( ClipItem *clip )
     }
     else
     {
+        // Add to undo stack
+        m_pUndoStack->push( new EditClipCommand( clip, origClip.serializeToJson() ) );
+
         // Update status bar
         int matches  = m_pImageData->makeQuery(clip->pClipModel->getImageQuery()).size();
         QString imgs = (matches != 1 ? " images: " : " image: ");

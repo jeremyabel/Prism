@@ -4,6 +4,30 @@
 #include "ClipCommands.h"
 
 
+EditClipCommand::EditClipCommand( ClipItem *clipItem, QJsonObject oldJson, QUndoCommandPrivate *parent )
+{
+    Q_UNUSED(parent);
+
+    m_pClipItem     = clipItem;
+    m_oldJson       = oldJson;
+    m_newJson       = clipItem->pClipModel->serializeToJson();
+}
+
+void EditClipCommand::undo()
+{
+    qDebug() << "EditClipCommand: undo";
+
+    m_pClipItem->pClipModel = new ClipModel( m_oldJson );
+    m_pClipItem->update();
+}
+
+void EditClipCommand::redo()
+{
+    m_pClipItem->pClipModel = new ClipModel( m_newJson );
+    m_pClipItem->update();
+}
+
+
 
 MoveClipCommand::MoveClipCommand( ClipItem *clipItem, TrackItem* newTrackItem, QUndoCommandPrivate *parent )
 {

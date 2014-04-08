@@ -2,6 +2,7 @@
 #define CLIPCOMMANDS_H
 
 #include <QUndoCommand>
+#include <QJsonObject>
 
 #include "ClipItem.h"
 #include "TrackItem.h"
@@ -10,9 +11,15 @@
 class EditClipCommand : public QUndoCommand
 {
 public:
+    EditClipCommand( ClipItem* clipItem, QJsonObject oldJson, QUndoCommandPrivate* parent = 0 );
+
+    void undo();
+    void redo();
 
 private:
     ClipItem*   m_pClipItem;
+    QJsonObject m_oldJson;
+    QJsonObject m_newJson;
 };
 
 
