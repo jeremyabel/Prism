@@ -234,8 +234,12 @@ void ImageData::setQueryAsUnused( QueryMap query )
 
 void ImageData::close()
 {
-    qDebug() << "ImageData close";
-    sqlite3_close(m_pDatabase);
+    if ( m_bIsReady )
+    {
+        qDebug() << "ImageData close";
+        sqlite3_close(m_pDatabase);
+    }
+
     m_bIsReady = false;
 }
 
