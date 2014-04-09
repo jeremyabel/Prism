@@ -36,6 +36,8 @@ typedef QMap<ParameterType, QVariant>   QueryMap;
 class ImageData
 {
 public:
+    ImageData()         { m_bIsReady = false; }
+
     void                initWithJson( QJsonObject jsonObject );
     void                setImageUsedState( ImageModel targetImage, bool used );
     void                setQueryAsUnused( QueryMap query );
@@ -43,11 +45,13 @@ public:
 
     QString             getSqlStringFromQuery( QueryMap queryMap, bool forceUnused = false );
     QList<ImageModel>   makeQuery( QueryMap queryMap, bool forceUnused = false );
+    bool                isReady();
 
 private:
     int boolToInt( bool value ) const { return value ? 1 : 0; }
 
-    sqlite3* m_pDatabase;
+    bool        m_bIsReady;
+    sqlite3*    m_pDatabase;
     QHash<QString, QList<ImageModel> > m_prevQueries;
 
 };

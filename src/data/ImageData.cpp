@@ -93,12 +93,16 @@ void ImageData::initWithJson( QJsonObject jsonObject )
         return;
     }
 
+    m_bIsReady = imagesArray.count() > 0;
     qDebug() << imagesArray.count() << "records created successfully";
 }
 
 
 QList<ImageModel> ImageData::makeQuery( QueryMap queryMap, bool forceUnused )
 {
+    if ( !m_bIsReady )
+        return QList<ImageModel>();
+
     char* zErrMsg = 0;
     StringMapList* data = new StringMapList();
 
@@ -232,9 +236,17 @@ void ImageData::close()
 {
     qDebug() << "ImageData close";
     sqlite3_close(m_pDatabase);
+    m_bIsReady = false;
 }
 
-uint qHash(const QueryMap &key)
+
+bool ImageData::isReady()
+{
+    return m_bIsReady;
+}
+
+
+uint qHash( const QueryMap &key )
 {
     Q_UNUSED(key);
     return 0;
