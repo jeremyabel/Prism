@@ -98,7 +98,7 @@ void ClipItem::snapTo16ths( int posx )
     float fDeltaX           = m_clickCursorPos.x() - posx;
     int   iDeltaDivisions   = -(int)roundf( fDeltaX / m_fSpacing16ths );
 
-    pClipModel->setStarting16th( clamp( m_clickStarting16ths + iDeltaDivisions, 0, INFINITY ) );
+    pClipModel->setStarting16th( clamp( m_clickStarting16ths + iDeltaDivisions, 0, INFINITY ), true );
 }
 
 
@@ -213,7 +213,7 @@ void ClipItem::mouseReleaseEvent( QGraphicsSceneMouseEvent *event )
     {
         snapTo16ths( QCursor::pos().x() );
         setPos( calculateXPos(), 0 );
-    }        
+    }
 
     // Notify and reset
     emit mouseUp( this );
