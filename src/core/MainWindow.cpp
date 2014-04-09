@@ -501,6 +501,8 @@ void MainWindow::on_menu_aboutToShow()
     ui->menuEdit->actions().at(1)->setText( "Redo " + m_pUndoStack->redoText() );
 
     ui->menuFile->actions().at(2)->setEnabled( m_bModified );
+
+    ui->menuFile->actions().at(5)->setEnabled( m_pImageData->isReady() );
 }
 
 
@@ -549,6 +551,10 @@ void MainWindow::on_actionNew_triggered()
     // Remove existing tracks
     while ( m_pTrackItems.size() > 0 )
         removeTrack( m_pTrackItems[0] );
+
+    // Reset data
+    m_pImageData->close();
+    m_pCategoryData->categoryList->clear();
 
     // Add one new track
     TrackModel* pTrackModel = new TrackModel( "track 1", QColor( Qt::red) );
