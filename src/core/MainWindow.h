@@ -49,6 +49,7 @@ private slots:
     void                    on_actionExport_triggered();
     void                    on_actionAdd_Track_triggered();
 
+    void                    on_menu_aboutToShow();
     void                    on_graphicsView_customContextMenuRequested( const QPoint &pos );
 
     void on_actionUndo_triggered();

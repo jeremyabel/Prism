@@ -48,6 +48,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     addAction( ui->actionPaste_Clip );
     addAction( ui->actionAdd_Track );
 
+    connect( ui->menuFile, SIGNAL( aboutToShow() ), SLOT( on_menu_aboutToShow() ) );
+    connect( ui->menuEdit, SIGNAL( aboutToShow() ), SLOT( on_menu_aboutToShow() ) );
+
     m_pScene = new QGraphicsScene( this );
     ui->graphicsView->setScene( m_pScene );
 
@@ -489,6 +492,18 @@ int MainWindow::getNearest16th()
 // Menu Actions
 //------------------------------------------------------------------------------------------------------
 
+void MainWindow::on_menu_aboutToShow()
+{
+    ui->menuEdit->actions().at(0)->setEnabled( m_pUndoStack->canUndo() );
+    ui->menuEdit->actions().at(0)->setText( "Undo " + m_pUndoStack->undoText() );
+
+    ui->menuEdit->actions().at(1)->setEnabled( m_pUndoStack->canRedo() );
+    ui->menuEdit->actions().at(1)->setText( "Redo " + m_pUndoStack->redoText() );
+
+    ui->menuFile->actions().at(2)->setEnabled( m_bModified );
+}
+
+
 bool MainWindow::releaseModifiedFile()
 {
     // Allow user to save current file if it has been modified since the last save
@@ -544,6 +559,8 @@ void MainWindow::on_actionNew_triggered()
 
     QSettings settings("jeremyabel.com", "Prism");
     settings.setValue("path", "");
+
+    m_bModified = false;
 }
 
 
@@ -583,7 +600,6 @@ void MainWindow::on_actionOpen_triggered()
             addTrack( loadedTracks[i] );
 
         m_bModified = false;
-
         ui->statusBar->showMessage("Loaded " + QString::number(loadedTracks.size()) + " track(s) " + "from " + m_sCurrentPath + ".", 10000 );
     }
 }
@@ -605,9 +621,14 @@ void MainWindow::on_actionSave_triggered()
 
         // Write file to current path
         if ( FileManager::saveToFile( m_sCurrentPath, m_sCategoryPath, trackModels ) )
+        {
+            m_bModified = false;
             ui->statusBar->showMessage( "Saved successfully.", 2500 );
+        }
         else
+        {
             QMessageBox::critical( this, "Error", "There was a problem while saving :(", QMessageBox::Ok );
+        }
     }
 }
 
@@ -643,6 +664,7 @@ void MainWindow::on_actionSave_As_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("path", m_sCurrentPath);
 
+        m_bModified = false;
         ui->statusBar->showMessage( "Saved successfully.", 2500 );
     }
     else
