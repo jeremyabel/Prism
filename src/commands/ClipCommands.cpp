@@ -131,6 +131,7 @@ bool ResizeClipCommand::mergeWith( const QUndoCommand *command )
     const ResizeClipCommand *resizeCommand = static_cast<const ResizeClipCommand*>(command);
     ClipItem* clipItem = resizeCommand->m_pClipItem;
 
+    // Don't merge when switching resize directions
     if ( m_pClipItem != clipItem || eResizeDir != resizeCommand->eResizeDir )
         return false;
 
