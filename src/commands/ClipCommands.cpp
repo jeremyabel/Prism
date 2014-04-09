@@ -87,7 +87,7 @@ bool MoveClipCommand::mergeWith( const QUndoCommand *command )
 
 
 
-ResizeClipCommand::ResizeClipCommand( ClipItem *clipItem, QUndoCommandPrivate *parent )
+ResizeClipCommand::ResizeClipCommand( ClipItem *clipItem, ClipItem::ResizeDirection resizeDir, QUndoCommandPrivate *parent )
 {
     Q_UNUSED(parent);
 
@@ -96,6 +96,7 @@ ResizeClipCommand::ResizeClipCommand( ClipItem *clipItem, QUndoCommandPrivate *p
     m_iOldEnding16th    = clipItem->pClipModel->oldEnding16th;
     m_iNewStarting16th  = clipItem->pClipModel->starting16th;
     m_iNewEnding16th    = clipItem->pClipModel->ending16th;
+    eResizeDir          = resizeDir;
 
     setText( "resize" );
 }
@@ -104,9 +105,18 @@ void ResizeClipCommand::undo()
 {
     qDebug() << "ResizeClipCommand: undo";
 
-    m_pClipItem->pClipModel->setStarting16th( m_iOldStarting16th, true );
-    m_pClipItem->pClipModel->setEnding16th( m_iOldEnding16th, true );
-    m_pClipItem->setX( m_pClipItem->calculateXPos() );
+    if ( eResizeDir == ClipItem::RESIZE_LEFT )
+    {
+        m_pClipItem->pClipModel->setStarting16th( m_iOldStarting16th, true );
+        m_pClipItem->pClipModel->setEnding16th( m_iOldEnding16th, true );
+        m_pClipItem->setX( m_pClipItem->calculateXPos() );
+    }
+    else
+    {
+        m_pClipItem->pClipModel->setEnding16th( m_iOldEnding16th );
+    }
+
+    m_pClipItem->update();
 }
 
 void ResizeClipCommand::redo()
@@ -118,10 +128,10 @@ void ResizeClipCommand::redo()
 
 bool ResizeClipCommand::mergeWith( const QUndoCommand *command )
 {
-    const MoveClipCommand *moveCommand = static_cast<const MoveClipCommand*>(command);
-    ClipItem* clipItem = moveCommand->m_pClipItem;
+    const ResizeClipCommand *resizeCommand = static_cast<const ResizeClipCommand*>(command);
+    ClipItem* clipItem = resizeCommand->m_pClipItem;
 
-    if ( m_pClipItem != clipItem )
+    if ( m_pClipItem != clipItem || eResizeDir != resizeCommand->eResizeDir )
         return false;
 
     m_iNewStarting16th  = clipItem->pClipModel->starting16th;

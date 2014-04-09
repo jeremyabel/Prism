@@ -127,8 +127,8 @@ void MainWindow::addClip( ClipModel *clipModel, TrackItem *trackItem, bool appen
     connect( clipItem, SIGNAL( mouseDown(ClipItem*) ),   SLOT( on_timelineClipGrabbed(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseUp(ClipItem*) ),     SLOT( on_timelineClipReleased(ClipItem*) ) );
     connect( clipItem, SIGNAL( mouseDouble(ClipItem*) ), SLOT( on_timelineClipDoubleClicked(ClipItem*) ) );
-    connect( clipItem, SIGNAL( resized(ClipItem*) ),     SLOT( on_timelineClipResized(ClipItem*) ) );
     connect( clipItem, SIGNAL( detached() ),             SLOT( on_timelineClipDetached() ) );
+    connect( clipItem, SIGNAL( resized(ClipItem*, ClipItem::ResizeDirection) ), SLOT( on_timelineClipResized(ClipItem*, ClipItem::ResizeDirection) ) );
 
     clipItem->setParentItem( trackItem );
     clipItem->color = trackItem->pTrackModel->qColor;
@@ -418,10 +418,10 @@ void MainWindow::on_timelineClipMoved()
 }
 
 
-void MainWindow::on_timelineClipResized( ClipItem *clip )
+void MainWindow::on_timelineClipResized( ClipItem *clip, ClipItem::ResizeDirection resizeDir )
 {
     // Add to undo stack
-    m_pUndoStack->push( new ResizeClipCommand(clip) );
+    m_pUndoStack->push( new ResizeClipCommand(clip, resizeDir) );
 }
 
 
@@ -695,6 +695,7 @@ void MainWindow::on_actionImport_triggered()
         QSettings settings("jeremyabel.com", "Prism");
         settings.setValue("categoryPath", m_sCategoryPath);
 
+        m_bModified = true;
         ui->statusBar->showMessage( "Metafile imported successfully.", 2500 );
     }
     else
@@ -779,6 +780,8 @@ void MainWindow::on_actionUndo_triggered()
 {
     m_pUndoStack->undo();
     m_pScene->update();
+
+    m_bModified = true;
 
     // Redraw tracks
     for ( int i = 0; i < m_pTrackItems.length(); i++ )

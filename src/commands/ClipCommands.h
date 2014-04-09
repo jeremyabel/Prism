@@ -70,12 +70,14 @@ class ResizeClipCommand : public QUndoCommand
 public:
     enum { Id = 2 };
 
-    ResizeClipCommand( ClipItem* clipItem, QUndoCommandPrivate* parent = 0 );
+    ResizeClipCommand( ClipItem* clipItem, ClipItem::ResizeDirection resizeDir, QUndoCommandPrivate* parent = 0 );
 
     void undo();
     void redo();
     bool mergeWith( const QUndoCommand* command );
     int  id() const { return Id; }
+
+    ClipItem::ResizeDirection eResizeDir;
 
 private:
     ClipItem*   m_pClipItem;

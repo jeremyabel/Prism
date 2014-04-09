@@ -132,7 +132,6 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             if ( pClipModel->starting16th <= leftClip->ending16th )
             {
                 pClipModel->starting16th = leftClip->ending16th;
-                emit resized( this );
                 update();
                 return;
             }
@@ -144,7 +143,6 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             if ( pClipModel->ending16th >= rightClip->starting16th )
             {
                 pClipModel->ending16th = rightClip->starting16th;
-                emit resized( this );
                 update();
                 return;
             }
@@ -158,7 +156,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
         {
             // Drag right side
             pClipModel->setEnding16th( m_clickEnding16ths + delta16ths );
-            emit resized( this );
+            emit resized( this, RESIZE_RIGHT );
         }
         else if ( pClipModel->length16th >= 1 && m_fWidth > TRACK_DRAG_MIN_WIDTH )
         {
@@ -166,7 +164,7 @@ void ClipItem::mouseMoveEvent( QGraphicsSceneMouseEvent *event )
             snapTo16ths( QCursor::pos().x() );
             pClipModel->setEnding16th( m_clickEnding16ths );
             setX( calculateXPos() );
-            emit resized( this );
+            emit resized( this, RESIZE_LEFT );
         }
 
         update();

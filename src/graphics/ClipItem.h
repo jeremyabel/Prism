@@ -19,6 +19,8 @@ class ClipItem : public QGraphicsObject
     Q_OBJECT
 
 public:
+    enum ResizeDirection { RESIZE_LEFT, RESIZE_RIGHT };
+
     ClipItem( ClipModel* clipModel, QGraphicsItem *parent = 0 );
 
     QRectF          boundingRect() const;
@@ -41,7 +43,7 @@ signals:
     void            mouseDown(   ClipItem* clip );
     void            mouseUp(     ClipItem* clip );
     void            mouseDouble( ClipItem* clip );
-    void            resized(     ClipItem* clip );
+    void            resized(     ClipItem* clip, ClipItem::ResizeDirection resizeDir );
     void            detached();
 
 protected:
