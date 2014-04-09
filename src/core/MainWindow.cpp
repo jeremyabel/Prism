@@ -302,17 +302,13 @@ void MainWindow::on_timelineClipReleased( ClipItem* clip )
 
     TrackItem* targetTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
 
-    // Track mouse
-    if ( m_pDraggingClip->bDetached )
-        m_pDraggingClip->pClipModel->setStarting16th( getNearest16th(), true );
+    // Don't do anything if we don't need to
+    if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
+        return;
 
     // Keep reference for undo stack
     if ( m_pDraggingClip->parentObject() )
         clip->pPrevTrackItem = static_cast<TrackItem*>(m_pDraggingClip->parentObject());
-
-    // Don't do anything if we don't need to
-    if ( !m_pDraggingClip->bMoved || m_bDialogOpen || m_pDraggingClip->bLocked )
-        return;
 
     // If we're not hovering over a track, go back to the original track
     if ( m_pHoverTrack != NULL )
@@ -599,9 +595,7 @@ void MainWindow::on_actionSave_triggered()
 
     // Just run Save As if we've never saved before
     if ( m_sCurrentPath.length() <= 0 )
-    {
         on_actionSave_As_triggered();
-    }
     else
     {
         // Put track models into list
@@ -611,13 +605,9 @@ void MainWindow::on_actionSave_triggered()
 
         // Write file to current path
         if ( FileManager::saveToFile( m_sCurrentPath, m_sCategoryPath, trackModels ) )
-        {
             ui->statusBar->showMessage( "Saved successfully.", 2500 );
-        }
         else
-        {
             QMessageBox::critical( this, "Error", "There was a problem while saving :(", QMessageBox::Ok );
-        }
     }
 }
 
@@ -737,13 +727,9 @@ void MainWindow::on_actionExport_triggered()
 
     // Export!
     if ( FileManager::exportToXML(path, &trackModels, m_pCategoryData, m_pImageData, exportDialog->bpm, exportDialog->fps) )
-    {
         ui->statusBar->showMessage( "Exported successfully", 2500 );
-    }
     else
-    {
         QMessageBox::critical( this, "Error", "There was a problem while exporting :(", QMessageBox::Ok );
-    }
 }
 
 
@@ -764,6 +750,17 @@ void MainWindow::on_actionAdd_Track_triggered()
         TrackModel* pTrackModel = new TrackModel( pAddDialog->newNameString, pAddDialog->color );
         addTrack( pTrackModel );
     }
+}
+
+
+void MainWindow::on_actionUndo_triggered()
+{
+    m_pUndoStack->undo();
+    m_pScene->update();
+
+    // Redraw tracks
+    for ( int i = 0; i < m_pTrackItems.length(); i++ )
+        m_pTrackItems[i]->update();
 }
 
 
@@ -830,14 +827,4 @@ void MainWindow::on_graphicsView_customContextMenuRequested( const QPoint &pos )
                 removeTrack( hoverTrack );
         }
     }
-}
-
-void MainWindow::on_actionUndo_triggered()
-{
-    m_pUndoStack->undo();
-    m_pScene->update();
-
-    // Redraw tracks
-    for ( int i = 0; i < m_pTrackItems.length(); i++ )
-        m_pTrackItems[i]->update();
 }

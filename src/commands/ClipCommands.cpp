@@ -11,6 +11,8 @@ EditClipCommand::EditClipCommand( ClipItem *clipItem, QJsonObject oldJson, QUndo
     m_pClipItem     = clipItem;
     m_oldJson       = oldJson;
     m_newJson       = clipItem->pClipModel->serializeToJson();
+
+    setText( "edit" );
 }
 
 void EditClipCommand::undo()
@@ -38,13 +40,15 @@ MoveClipCommand::MoveClipCommand( ClipItem *clipItem, TrackItem* newTrackItem, Q
     m_pOldTrackItem     = clipItem->pPrevTrackItem;
     m_iNewStarting16th  = clipItem->pClipModel->starting16th;
     m_pNewTrackItem     = newTrackItem;
+
+    setText( "move" );
 }
 
 void MoveClipCommand::undo()
 {
     qDebug() << "MoveClipCommand: undo";
 
-    m_pClipItem->pClipModel->setStarting16th( m_iOldStarting16th );
+    m_pClipItem->pClipModel->setStarting16th( m_iOldStarting16th, true );
 
     // Remove from new track
     m_pNewTrackItem->pTrackModel->remove( m_pClipItem->pClipModel );
@@ -58,7 +62,7 @@ void MoveClipCommand::redo()
 {
     qDebug() << "MoveClipCommand";
 
-    m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th );
+    m_pClipItem->pClipModel->setStarting16th( m_iNewStarting16th, true );
 
     // Remove from old track
     m_pOldTrackItem->pTrackModel->remove( m_pClipItem->pClipModel );
@@ -73,7 +77,8 @@ bool MoveClipCommand::mergeWith( const QUndoCommand *command )
     const MoveClipCommand *moveCommand = static_cast<const MoveClipCommand*>(command);
     ClipItem* clipItem = moveCommand->m_pClipItem;
 
-    if ( m_pClipItem != clipItem )
+    // Don't merge when changing tracks
+    if ( m_pClipItem != clipItem || m_pNewTrackItem != moveCommand->m_pNewTrackItem )
         return false;
 
     m_iNewStarting16th = clipItem->pClipModel->starting16th;
@@ -91,6 +96,8 @@ ResizeClipCommand::ResizeClipCommand( ClipItem *clipItem, QUndoCommandPrivate *p
     m_iOldEnding16th    = clipItem->pClipModel->oldEnding16th;
     m_iNewStarting16th  = clipItem->pClipModel->starting16th;
     m_iNewEnding16th    = clipItem->pClipModel->ending16th;
+
+    setText( "resize" );
 }
 
 void ResizeClipCommand::undo()

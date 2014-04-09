@@ -55,10 +55,10 @@ public:
     int  id() const { return Id; }
 
     ClipItem*   m_pClipItem;
+    TrackItem*  m_pNewTrackItem;
 
 private:
     TrackItem*  m_pOldTrackItem;
-    TrackItem*  m_pNewTrackItem;
     int         m_iOldStarting16th;
     int         m_iNewStarting16th;
 };
