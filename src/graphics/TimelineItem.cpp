@@ -37,6 +37,11 @@ void TimelineItem::paint( QPainter *painter, const QStyleOptionGraphicsItem *opt
         m_iWidth += 1 + fSpacing;
     }
 
+    // Draw division text
+    painter->setFont( QFont( "Monaco", 8 ) );
+    painter->setPen( QColor(160, 160, 160) );
+    painter->drawText( -6, 4, 100, 15, Qt::AlignRight, m_divisionName );
+
     // Horiz lines
     painter->setPen( QPen( QColor(45, 45, 45) ) );
     painter->drawLine( 0, 0, m_iWidth, 0 );
@@ -53,11 +58,11 @@ QRectF TimelineItem::boundingRect() const
 void TimelineItem::setZoomValue( int value )
 {
     // Adaptive subdivision
-    if (      value <= 100 )    iDivisions = 1;
-    else if ( value <= 250 )    iDivisions = 2;
-    else if ( value <= 450 )    iDivisions = 4;
-    else if ( value <= 650 )    iDivisions = 8;
-    else if ( value <= 800 )    iDivisions = 16;
+    if (      value <= 100 ) { iDivisions = 1;  m_divisionName = "whole";   }
+    else if ( value <= 250 ) { iDivisions = 2;  m_divisionName = "half";    }
+    else if ( value <= 450 ) { iDivisions = 4;  m_divisionName = "quarter"; }
+    else if ( value <= 650 ) { iDivisions = 8;  m_divisionName = "8ths";    }
+    else if ( value <= 800 ) { iDivisions = 16; m_divisionName = "16ths";   }
 
     float minSpacing = (float)MIN_SPACING / (float)iDivisions;
     float maxSpacing = (float)MAX_SPACING / (float)iDivisions;

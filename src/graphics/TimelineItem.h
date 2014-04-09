@@ -19,6 +19,7 @@ public:
 
 private:
     int             m_iWidth;
+    QString         m_divisionName;
 };
 
 #endif // TIMELINEITEM_H
