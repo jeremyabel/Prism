@@ -54,3 +54,7 @@ FORMS    += forms/MainWindow.ui \
 	    forms/ClipParamDialog.ui \
 	    forms/AddTrackDialog.ui \
 	    forms/ExportDialog.ui
+
+unix:!macx{
+LIBS += -ldl
+}

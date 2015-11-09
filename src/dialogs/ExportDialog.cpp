@@ -1,6 +1,7 @@
 #include <QDoubleValidator>
 #include <math.h>
-
+#include <cstdlib>
+#include <cstdio>
 #include "ExportDialog.h"
 #include "ui_ExportDialog.h"
 

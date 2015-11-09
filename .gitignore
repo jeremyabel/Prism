@@ -6,7 +6,11 @@ Prism.pro.user.d15f9a7.15
 Prism.pro.user.3.0-pre1
 
 *.user
-
+*.o
+Prism
+Makefile
+moc_*.cpp
+ui_*.h
 Prism.pro.user
 
 src/FileManager.cpp.autosave
